@@ -34,7 +34,7 @@ module "avi_controller_aws" {
   aws_secret_key = "<secret-key>"
   create_networking = "false"
   create_iam = "false"
-  avi_version = "20.1.5"
+  avi_version = "21.1.4"
   custom_vpc_id = "vpc-<id>"
   custom_subnet_ids = ["subnet-<id>","subnet-<id>","subnet-<id>"]
   avi_cidr_block = "10.154.0.0/16"
@@ -65,7 +65,7 @@ module "avi_controller_aws_west2" {
   create_networking     = "false"
   create_iam            = "false"
   controller_ha         = true
-  avi_version           = "20.1.6"
+  avi_version           = "21.1.4"
   custom_vpc_id         = "vpc-<id>"
   custom_subnet_ids     = ["subnet-<id>","subnet-<id>","subnet-<id>"]
   avi_cidr_block        = "10.154.0.0/16"
@@ -90,7 +90,7 @@ module "avi_controller_aws_east1" {
   create_networking               = "false"
   create_iam                      = "false"
   controller_ha                   = true
-  avi_version                     = "20.1.6"
+  avi_version                     = "21.1.4"
   custom_vpc_id                   = "vpc-<id>"
   custom_subnet_ids               = ["subnet-<id>","subnet-<id>","subnet-<id>"]
   avi_cidr_block                  = "10.155.0.0/16"
@@ -135,6 +135,9 @@ Example run (appropriate variables should be used):
 ```bash
 ~$ ansible-playbook avi-cleanup.yml -e password=${var.controller_password}
 ```
+## Contributing
+
+The terraform-aws-avi-alb-deployment-aws project team welcomes contributions from the community. Before you start working with this project please read and sign our Contributor License Agreement (https://cla.vmware.com/cla/1/preview). If you wish to contribute code and you have not signed our Contributor Licence Agreement (CLA), our bot will prompt you to do so when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq). For more detailed information, refer to [CONTRIBUTING.md](CONTRIBUTING.md).
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
