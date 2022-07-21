@@ -26,7 +26,7 @@ terraform {
   }
 }
 module "avi_controller_aws" {
-  source  = "slarimore02/avi-controller-aws/aws"
+  source  = "vmware/avi-alb-deployment-aws/aws"
   version = "1.0.x"
 
   region = "us-west-1"
@@ -34,7 +34,7 @@ module "avi_controller_aws" {
   aws_secret_key = "<secret-key>"
   create_networking = "false"
   create_iam = "false"
-  avi_version = "21.1.4"
+  avi_version = "22.1.1"
   custom_vpc_id = "vpc-<id>"
   custom_subnet_ids = ["subnet-<id>","subnet-<id>","subnet-<id>"]
   avi_cidr_block = "10.154.0.0/16"
@@ -56,7 +56,7 @@ terraform {
   }
 }
 module "avi_controller_aws_west2" {
-  source                = "slarimore02/avi-controller-aws/aws"
+  source                = "vmware/avi-alb-deployment-aws/aws"
   version               = "1.0.x"
 
   region                = "us-west-2"
@@ -65,7 +65,7 @@ module "avi_controller_aws_west2" {
   create_networking     = "false"
   create_iam            = "false"
   controller_ha         = true
-  avi_version           = "21.1.4"
+  avi_version           = "22.1.1"
   custom_vpc_id         = "vpc-<id>"
   custom_subnet_ids     = ["subnet-<id>","subnet-<id>","subnet-<id>"]
   avi_cidr_block        = "10.154.0.0/16"
@@ -81,7 +81,7 @@ module "avi_controller_aws_west2" {
   dns_vs_settings       = { allocate_public_ip = "true", subnet_name           = "companyname-avi-subnet" }
 }
 module "avi_controller_aws_east1" {
-  source  = "slarimore02/avi-controller-aws/aws"
+  source  = "vmware/avi-alb-deployment-aws/aws"
   version = "1.0.x"
 
   region                          = "us-east-1"
@@ -90,7 +90,7 @@ module "avi_controller_aws_east1" {
   create_networking               = "false"
   create_iam                      = "false"
   controller_ha                   = true
-  avi_version                     = "21.1.4"
+  avi_version                     = "22.1.1"
   custom_vpc_id                   = "vpc-<id>"
   custom_subnet_ids               = ["subnet-<id>","subnet-<id>","subnet-<id>"]
   avi_cidr_block                  = "10.155.0.0/16"
