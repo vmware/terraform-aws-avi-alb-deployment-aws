@@ -375,6 +375,19 @@
   %{ endif }
   %{ if configure_gslb_additional_sites }%{ for site in additional_gslb_sites }
 
+    - name: GSLB Config | Verify Remote Site is Ready
+      avi_api_session:
+        controller: "${site.ip_address_list[0]}"
+        username: "admin"
+        password: "{{ password }}"
+        api_version: ${avi_version}
+        http_method: get
+        path: virtualservice?name=DNS-VS
+      until: remote_site_check is not failed
+      retries: 30
+      delay: 10
+      register: remote_site_check
+
     - name: GSLB Config | Verify DNS configuration
       avi_api_session:
         controller: "${site.ip_address_list[0]}"
@@ -383,7 +396,8 @@
         api_version: ${avi_version}
         http_method: get
         path: virtualservice?name=DNS-VS
-      until: dns_vs_verify.obj.count == 1
+      until: dns_vs_verify is not failed
+      failed_when: dns_vs_verify.obj.count != 1
       retries: 30
       delay: 10
       register: dns_vs_verify
