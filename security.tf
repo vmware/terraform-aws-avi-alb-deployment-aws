@@ -66,6 +66,13 @@ resource "aws_security_group" "avi_se_mgmt_sg" {
     cidr_blocks = [var.avi_cidr_block]
   }
   ingress {
+    description = "Allow SE distributed object store traffic"
+    from_port   = 4001
+    to_port     = 4001
+    protocol    = "tcp"
+    cidr_blocks = [var.avi_cidr_block]
+  }
+  ingress {
     description = "ICMP to SE"
     from_port   = -1
     to_port     = -1
@@ -97,6 +104,13 @@ resource "aws_security_group" "avi_se_mgmt_sg" {
     description = "Allow SSH to Controller"
     from_port   = 22
     to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.avi_cidr_block]
+  }
+  egress {
+    description = "Allow SE distributed object store traffic"
+    from_port   = 4001
+    to_port     = 4001
     protocol    = "tcp"
     cidr_blocks = [var.avi_cidr_block]
   }
