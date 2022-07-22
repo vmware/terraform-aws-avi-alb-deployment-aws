@@ -9,12 +9,13 @@
   vars:
     avi_credentials:
         controller: "{{ controller_ip[0] }}"
-        username: "admin"
+        username: "{{ username }}"
         password: "{{ password }}"
-        api_version: ${avi_version}
+        api_version: "{{ api_version }}"
     controller: "{{ ansible_host }}"
     username: admin
     password: "{{ password }}"
+    api_version: ${avi_version}
     cloud_name: "Default-Cloud"
     controller_ip:
       ${ indent(6, yamlencode(controller_ip))}
@@ -378,9 +379,9 @@
     - name: GSLB Config | Verify Remote Site is Ready
       avi_api_session:
         controller: "${site.ip_address_list[0]}"
-        username: "admin"
+        username: "{{ username }}"
         password: "{{ password }}"
-        api_version: ${avi_version}
+        api_version: "{{ api_version }}"
         http_method: get
         path: virtualservice?name=DNS-VS
       until: remote_site_check is not failed
@@ -391,9 +392,9 @@
     - name: GSLB Config | Verify DNS configuration
       avi_api_session:
         controller: "${site.ip_address_list[0]}"
-        username: "admin"
+        username: "{{ username }}"
         password: "{{ password }}"
-        api_version: ${avi_version}
+        api_version: "{{ api_version }}"
         http_method: get
         path: virtualservice?name=DNS-VS
       until: dns_vs_verify is not failed
@@ -471,6 +472,10 @@
               ip:
                 type: V4
                 addr: "{{ controller_ip[2] }}"
-        name: "cluster01"
+        name: "{{ se_name_prefix }}-cluster"
         tenant_uuid: "admin"
+      until: cluster_config is not failed
+      retries: 10
+      delay: 5
+      register: cluster_config
 %{ endif }
