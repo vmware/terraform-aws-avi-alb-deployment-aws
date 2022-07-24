@@ -230,9 +230,7 @@ No modules.
 | <a name="input_private_key_path"></a> [private\_key\_path](#input\_private\_key\_path) | The local private key path for the EC2 Key pair used for authenticating to the Avi Controller | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The Region that the AVI controller and SEs will be deployed to | `string` | n/a | yes |
 | <a name="input_register_controller"></a> [register\_controller](#input\_register\_controller) | If true the controller will be register and licensed with Avi Cloud Services. Variables with registration\_ are required for registration to be successful | `bool` | `"false"` | no |
-| <a name="input_registration_account_id"></a> [registration\_account\_id](#input\_registration\_account\_id) | Registration account ID for Avi Cloud Services | `string` | `""` | no |
-| <a name="input_registration_email"></a> [registration\_email](#input\_registration\_email) | Registration email address for Avi Cloud Services | `string` | `""` | no |
-| <a name="input_registration_jwt"></a> [registration\_jwt](#input\_registration\_jwt) | Registration JWT Token for Avi Cloud Services. This token can be retrieved at https://portal.avipulse.vmware.com/portal/controller/auth/cspctrllogin | `string` | `""` | no |
+| <a name="input_registration_settings"></a> [registration\_settings](#input\_registration\_settings) | Registration settings for Avi Cloud Services. The Long Organization ID (organization\_id) can be found from https://console.cloud.vmware.com/csp/gateway/portal/#/organization/info. The jwt\_token can be retrieved at https://portal.avipulse.vmware.com/portal/controller/auth/cspctrllogin | `object({ jwt_token = string, email = string, organization_id = string })` | <pre>{<br>  "email": "",<br>  "jwt_token": "",<br>  "organization_id": ""<br>}</pre> | no |
 | <a name="input_se_ha_mode"></a> [se\_ha\_mode](#input\_se\_ha\_mode) | The HA mode of the Service Engine Group. Possible values active/active, n+m, or active/standby | `string` | `"active/active"` | no |
 
 ## Outputs
