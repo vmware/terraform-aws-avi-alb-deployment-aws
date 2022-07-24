@@ -37,6 +37,26 @@ variable "controller_ha" {
   type        = bool
   default     = "false"
 }
+variable "register_controller" {
+  description = "If true the controller will be register and licensed with Avi Cloud Services. Variables with registration_ are required for registration to be successful"
+  type        = bool
+  default     = "false"
+}
+variable "registration_jwt" {
+  description = "Registration JWT Token for Avi Cloud Services"
+  type        = string
+  default     = ""
+}
+variable "registration_email" {
+  description = "Registration email address for Avi Cloud Services"
+  type        = string
+  default     = ""
+}
+variable "registration_account_id" {
+  description = "Registration account ID for Avi Cloud Services"
+  type        = string
+  default     = ""
+}
 variable "create_networking" {
   description = "This variable controls the VPC and subnet creation for the AVI Controller. When set to false the custom-vpc-name and custom-subnetwork-name must be set."
   type        = bool
@@ -63,9 +83,9 @@ variable "custom_subnet_ids" {
   default     = null
 }
 variable "create_iam" {
-  description = "Create IAM Service Account, Roles, and Role Bindings for Avi GCP Full Access Cloud"
+  description = "Create IAM policy, roles, and instance profile for Avi AWS Full Access Cloud. If set to false the aws_access_key and aws_secret_key variables will be used for the Cloud configuration and all policy must be created as found in https://avinetworks.com/docs/latest/iam-role-setup-for-installation-into-aws/"
   type        = bool
-  default     = "false"
+  default     = "true"
 }
 variable "controller_password" {
   description = "The password that will be used authenticating with the AVI Controller. This password be a minimum of 8 characters and contain at least one each of uppercase, lowercase, numbers, and special characters"

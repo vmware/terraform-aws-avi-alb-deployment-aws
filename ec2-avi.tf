@@ -4,6 +4,7 @@
 locals {
   # AKO Settings
   cloud_settings = {
+    create_iam                      = var.create_iam
     se_mgmt_subnets                 = var.create_networking ? local.mgmt_subnets : local.custom_mgmt_subnets
     vpc_id                          = var.create_networking ? aws_vpc.avi[0].id : var.custom_vpc_id
     aws_region                      = var.region
@@ -12,10 +13,14 @@ locals {
     dns_search_domain               = var.dns_search_domain
     ntp_servers                     = var.ntp_servers
     email_config                    = var.email_config
-    se_name_prefix                  = var.name_prefix
+    name_prefix                     = var.name_prefix
     mgmt_security_group             = aws_security_group.avi_se_mgmt_sg.id
     data_security_group             = aws_security_group.avi_data_sg.id
     controller_ha                   = var.controller_ha
+    register_controller             = var.register_controller
+    registration_jwt                = var.registration_jwt
+    registration_email              = var.registration_email
+    registration_account_id         = var.registration_account_id
     controller_ip                   = local.controller_ip
     controller_names                = local.controller_names
     configure_dns_route_53          = var.configure_dns_route_53
@@ -114,20 +119,39 @@ resource "null_resource" "ansible_provisioner" {
     private_key = file(var.private_key_path)
   }
   provisioner "file" {
-    content = templatefile("${path.module}/files/avi-cleanup.yml.tpl",
-    local.cloud_settings)
-    destination = "/home/admin/avi-cleanup.yml"
+    source      = "${path.module}/files/avi_pulse_registration.py"
+    destination = "/home/admin/avi_pulse_registration.py"
   }
   provisioner "file" {
     content = templatefile("${path.module}/files/avi-controller-aws-all-in-one-play.yml.tpl",
     local.cloud_settings)
     destination = "/home/admin/avi-controller-aws-all-in-one-play.yml"
   }
+  provisioner "file" {
+    content = templatefile("${path.module}/files/avi-cloud-services-registration.yml.tpl",
+    local.cloud_settings)
+    destination = "/home/admin/avi-cloud-services-registration.yml"
+  }
+  provisioner "file" {
+    content = templatefile("${path.module}/files/avi-cleanup.yml.tpl",
+    local.cloud_settings)
+    destination = "/home/admin/avi-cleanup.yml"
+  }
   provisioner "remote-exec" {
-    inline = [
+    inline = var.create_iam ? [
+      "sleep 30",
+      "ansible-playbook avi-controller-aws-all-in-one-play.yml -e password=${var.controller_password} > ansible-playbook.log 2> ansible-error.log",
+      "echo Controller Configuration Completed"
+      ] : [
       "sleep 30",
       "ansible-playbook avi-controller-aws-all-in-one-play.yml -e password=${var.controller_password} -e aws_access_key_id=${var.aws_access_key} -e aws_secret_access_key=${var.aws_secret_key} > ansible-playbook.log 2> ansible-error.log",
       "echo Controller Configuration Completed"
     ]
+  }
+  provisioner "remote-exec" {
+    inline = var.register_controller ? [
+      "ansible-playbook avi-cloud-services-registration.yml -e password=${var.controller_password} >> ansible-playbook.log 2>> ansible-error.log",
+      "echo Controller Registration Completed"
+    ] : ["echo Controller Registration Skipped"]
   }
 }

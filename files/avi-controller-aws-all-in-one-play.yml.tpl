@@ -25,7 +25,7 @@
     ansible_become_password: "{{ password }}"
     aws_vpc_id: ${vpc_id}
     aws_region: ${aws_region}
-    se_name_prefix: ${se_name_prefix}
+    name_prefix: ${name_prefix}
     se_ha_mode: ${se_ha_mode}
     mgmt_security_group: ${mgmt_security_group}
     data_security_group: ${data_security_group}
@@ -105,8 +105,12 @@
         dhcp_enabled: true
         license_type: "LIC_CORES"
         aws_configuration:
+%{ if create_iam ~}
+          use_iam_roles: true
+%{ else ~}
           access_key_id: "{{ aws_access_key_id }}"
           secret_access_key: "{{ aws_secret_access_key }}"
+%{ endif ~}
           region: "{{ aws_region }}"
           asg_poll_interval: 60
           vpc_id: "{{ aws_vpc_id }}"
@@ -140,7 +144,7 @@
           algo: PLACEMENT_ALGO_PACKED
           buffer_se: "0"
           max_se: "10"
-          se_name_prefix: "{{ se_name_prefix }}"
+          se_name_prefix: "{{ name_prefix }}"
           accelerated_networking: true
           disable_avi_securitygroups: true
           custom_securitygroups_mgmt:
@@ -167,7 +171,7 @@
           algo: PLACEMENT_ALGO_PACKED
           buffer_se: "1"
           max_se: "10"
-          se_name_prefix: "{{ se_name_prefix }}"
+          se_name_prefix: "{{ name_prefix }}"
           accelerated_networking: true
           disable_avi_securitygroups: true
           custom_securitygroups_mgmt:
@@ -192,7 +196,7 @@
           min_scaleout_per_vs: 1
           buffer_se: "0"
           max_se: "2"
-          se_name_prefix: "{{ se_name_prefix }}_se"
+          se_name_prefix: "{{ name_prefix }}_se"
           accelerated_networking: true
           disable_avi_securitygroups: true
           custom_securitygroups_mgmt:
@@ -241,7 +245,7 @@
           max_se: "4"
           max_vs_per_se: "1"
           extra_shared_config_memory: 2000
-          se_name_prefix: "{{ se_name_prefix }}"
+          se_name_prefix: "{{ name_prefix }}"
           realtime_se_metrics:
             duration: "60"
             enabled: true
@@ -472,10 +476,33 @@
               ip:
                 type: V4
                 addr: "{{ controller_ip[2] }}"
-        name: "{{ se_name_prefix }}-cluster"
+        name: "{{ name_prefix }}-cluster"
         tenant_uuid: "admin"
       until: cluster_config is not failed
       retries: 10
       delay: 5
       register: cluster_config
 %{ endif }
+%{ if register_controller ~}
+
+    - name: Create Ansible collection directory
+      ansible.builtin.file:
+        path: /usr/share/ansible/collections
+        state: directory
+        mode: '0755'
+        owner: admin
+        group: admin
+
+    - name: Install Avi Collection
+      shell: ansible-galaxy collection install vmware.alb -p /usr/share/ansible/collections
+
+    - name: Copy Ansible module file
+      ansible.builtin.copy:
+        src: /home/admin/avi_pulse_registration.py
+        dest: /usr/share/ansible/collections/ansible_collections/vmware/alb/plugins/modules/avi_pulse_registration.py
+    
+    - name: Remove unused module file
+      ansible.builtin.file:
+        path: /home/admin/avi_pulse_registration.py
+        state: absent
+%{ endif ~}
