@@ -8,18 +8,18 @@ resource "aws_security_group" "avi_controller_sg" {
   vpc_id      = var.create_networking ? aws_vpc.avi[0].id : var.custom_vpc_id
 
   ingress {
-    description = "SSH from Internet"
+    description = "SSH Ingress"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.firewall_controller_allow_source_range]
   }
   ingress {
     description = "HTTPS from Internet"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.firewall_controller_allow_source_range]
   }
   ingress {
     description = "Secure Channel from VPC"
@@ -33,7 +33,7 @@ resource "aws_security_group" "avi_controller_sg" {
     from_port   = 5054
     to_port     = 5054
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.firewall_controller_allow_source_range]
   }
   ingress {
     description = "ICMP to Controller"
@@ -135,31 +135,20 @@ resource "aws_security_group" "avi_se_mgmt_sg" {
   }
 }
 resource "aws_security_group" "avi_data_sg" {
-  count       = var.create_firewall_rules ? 1 : 0
+  count       = var.create_firewall_rules ? var.configure_firewall_se_data ? 1 : 0 : 0
   name        = "${var.name_prefix}-avi-data-sg"
   description = "Allow traffic for Avi SE Data NICs"
   vpc_id      = var.create_networking ? aws_vpc.avi[0].id : var.custom_vpc_id
 
-  ingress {
-    description = "Allow Traffic from VPC"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = [var.avi_cidr_block]
-  }
-  ingress {
-    description = "HTTPS Inbound"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    description = "HTTP Inbound"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+  dynamic "ingress" {
+    for_each = var.firewall_se_data_rules
+    content {
+      description = ingress.value["description"]
+      from_port   = ingress.value["port"]
+      to_port     = ingress.value["port"]
+      protocol    = ingress.value["protocol"]
+      cidr_blocks = [ingress.value["allow_ip_range"]]
+    }
   }
   egress {
     description = "Allow Traffic Outbound"

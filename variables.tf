@@ -54,9 +54,24 @@ variable "create_networking" {
   default     = "true"
 }
 variable "create_firewall_rules" {
-  description = "This variable controls the VPC firewall rule creation for the Avi deployment. When set to false the necessary firewall rules must be in place before the deployment"
+  description = "This variable controls the Security Group creation for the Avi deployment. When set to false the necessary firewall rules must be in place before the deployment"
   type        = bool
   default     = "true"
+}
+variable "configure_firewall_se_data" {
+  description = "Configure Firewall rules for SE dataplane traffic. If true the firewall_se_data_rules must also be set"
+  type        = bool
+  default     = "false"
+}
+variable "firewall_se_data_rules" {
+  description = "The ports allowed for Virtual Services hosted on Services Engines. The configure_firewall_se_data variable must be set to true for this rule to be created"
+  type        = list(object({ protocol = string, port = string, allow_ip_range = string, description = string }))
+  default     = [{ protocol = "tcp", port = "443", allow_ip_range = "0.0.0.0/0", description = "https" }, { protocol = "udp", port = "53", allow_ip_range = "10.0.0.0/8", description = "DNS" }]
+}
+variable "firewall_controller_allow_source_range" {
+  description = "The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default"
+  type        = string
+  default     = "0.0.0.0/0"
 }
 variable "controller_public_address" {
   description = "This variable controls if the Controller has a Public IP Address. When set to false the Ansible provisioner will connect to the private IP of the Controller."
@@ -64,7 +79,7 @@ variable "controller_public_address" {
   default     = "false"
 }
 variable "avi_cidr_block" {
-  description = "The CIDR that will be used for creating a subnet in the AVI VPC - a /16 should be provided "
+  description = "This CIDR that will be used for creating a subnet in the AVI VPC - a /16 should be provided. This range is also used for security group rules source IP range for internal communication between the Controllers and SEs"
   type        = string
   default     = "10.255.0.0/16"
 }
