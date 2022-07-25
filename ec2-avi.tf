@@ -66,7 +66,7 @@ resource "aws_instance" "avi_controller" {
   instance_type          = var.instance_type
   key_name               = var.key_pair_name
   subnet_id              = var.create_networking ? aws_subnet.avi[count.index].id : var.custom_subnet_ids[count.index]
-  vpc_security_group_ids = [aws_security_group.avi_controller_sg[0].id]
+  vpc_security_group_ids = var.create_firewall_rules ? [aws_security_group.avi_controller_sg[0].id] : var.firewall_controller_security_group_ids
   iam_instance_profile   = var.create_iam ? aws_iam_instance_profile.avi[0].id : null
   tags = {
     Name = "${var.name_prefix}-avi-controller-${count.index + 1}"

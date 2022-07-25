@@ -54,9 +54,19 @@ variable "create_networking" {
   default     = "true"
 }
 variable "create_firewall_rules" {
-  description = "This variable controls the Security Group creation for the Avi deployment. When set to false the necessary firewall rules must be in place before the deployment"
+  description = "This variable controls the Security Group creation for the Avi deployment. When set to false the necessary security group rules must be in place before the deployment and set with the firewall_custom_security_group_ids variable"
   type        = bool
   default     = "true"
+}
+variable "firewall_controller_allow_source_range" {
+  description = "The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default"
+  type        = string
+  default     = "0.0.0.0/0"
+}
+variable "firewall_controller_security_group_ids" {
+  description = "List of security group IDs that will be assigned to the controller. This variable must be set if the create_firewall_rules variable is set to false"
+  type        = list(string)
+  default     = null
 }
 variable "configure_firewall_se_data" {
   description = "Configure Firewall rules for SE dataplane traffic. If true the firewall_se_data_rules must also be set"
@@ -67,11 +77,6 @@ variable "firewall_se_data_rules" {
   description = "The ports allowed for Virtual Services hosted on Services Engines. The configure_firewall_se_data variable must be set to true for this rule to be created"
   type        = list(object({ protocol = string, port = string, allow_ip_range = string, description = string }))
   default     = [{ protocol = "tcp", port = "443", allow_ip_range = "0.0.0.0/0", description = "https" }, { protocol = "udp", port = "53", allow_ip_range = "10.0.0.0/8", description = "DNS" }]
-}
-variable "firewall_controller_allow_source_range" {
-  description = "The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default"
-  type        = string
-  default     = "0.0.0.0/0"
 }
 variable "controller_public_address" {
   description = "This variable controls if the Controller has a Public IP Address. When set to false the Ansible provisioner will connect to the private IP of the Controller."
