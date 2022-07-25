@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 resource "aws_security_group" "avi_controller_sg" {
+  count       = var.create_firewall_rules ? 1 : 0
   name        = "${var.name_prefix}-avi-controller-sg"
   description = "Allow Traffic for AVI Controller"
   vpc_id      = var.create_networking ? aws_vpc.avi[0].id : var.custom_vpc_id
@@ -54,6 +55,7 @@ resource "aws_security_group" "avi_controller_sg" {
   }
 }
 resource "aws_security_group" "avi_se_mgmt_sg" {
+  count       = var.create_firewall_rules ? 1 : 0
   name        = "${var.name_prefix}-avi-se-mgmt-sg"
   description = "Allow traffic for AVI SE MGMT NICs"
   vpc_id      = var.create_networking ? aws_vpc.avi[0].id : var.custom_vpc_id
@@ -133,6 +135,7 @@ resource "aws_security_group" "avi_se_mgmt_sg" {
   }
 }
 resource "aws_security_group" "avi_data_sg" {
+  count       = var.create_firewall_rules ? 1 : 0
   name        = "${var.name_prefix}-avi-data-sg"
   description = "Allow traffic for Avi SE Data NICs"
   vpc_id      = var.create_networking ? aws_vpc.avi[0].id : var.custom_vpc_id

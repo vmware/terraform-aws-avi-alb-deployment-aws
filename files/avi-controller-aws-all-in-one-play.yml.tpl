@@ -27,8 +27,10 @@
     aws_region: ${aws_region}
     name_prefix: ${name_prefix}
     se_ha_mode: ${se_ha_mode}
+%{ if create_firewall_rules ~}
     mgmt_security_group: ${mgmt_security_group}
     data_security_group: ${data_security_group}
+%{ endif ~}
     controller_ha: ${controller_ha}
 %{ if dns_servers != null ~}
     dns_servers:
@@ -147,10 +149,12 @@
           se_name_prefix: "{{ name_prefix }}"
           accelerated_networking: true
           disable_avi_securitygroups: true
+%{ if create_firewall_rules ~}
           custom_securitygroups_mgmt:
             - "{{ mgmt_security_group }}"
           custom_securitygroups_data:
             - "{{ data_security_group }}"
+%{ endif ~}
           realtime_se_metrics:
             duration: "10080"
             enabled: true
@@ -174,10 +178,12 @@
           se_name_prefix: "{{ name_prefix }}"
           accelerated_networking: true
           disable_avi_securitygroups: true
+%{ if create_firewall_rules ~}
           custom_securitygroups_mgmt:
             - "{{ mgmt_security_group }}"
           custom_securitygroups_data:
             - "{{ data_security_group }}"
+%{ endif ~}
           realtime_se_metrics:
             duration: "10080"
             enabled: true
@@ -199,10 +205,12 @@
           se_name_prefix: "{{ name_prefix }}_se"
           accelerated_networking: true
           disable_avi_securitygroups: true
+%{ if create_firewall_rules ~}
           custom_securitygroups_mgmt:
             - "{{ mgmt_security_group }}"
           custom_securitygroups_data:
             - "{{ data_security_group }}"
+%{ endif ~}
           realtime_se_metrics:
             duration: "10080"
             enabled: true
