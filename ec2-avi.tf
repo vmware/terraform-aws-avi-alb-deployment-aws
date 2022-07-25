@@ -15,8 +15,8 @@ locals {
     ntp_servers                     = var.ntp_servers
     email_config                    = var.email_config
     name_prefix                     = var.name_prefix
-    mgmt_security_group             = var.create_firewall_rules ? aws_security_group.avi_se_mgmt_sg[0].id : null
-    data_security_group             = var.create_firewall_rules ? aws_security_group.avi_data_sg[0].id : null
+    mgmt_security_group             = var.create_firewall_rules ? aws_security_group.avi_se_mgmt_sg[0].id : ""
+    data_security_group             = var.create_firewall_rules ? aws_security_group.avi_data_sg[0].id : ""
     controller_ha                   = var.controller_ha
     register_controller             = var.register_controller
     registration_jwt                = var.registration_settings.jwt_token

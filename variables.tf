@@ -68,13 +68,8 @@ variable "firewall_controller_security_group_ids" {
   type        = list(string)
   default     = null
 }
-variable "configure_firewall_se_data" {
-  description = "Configure Firewall rules for SE dataplane traffic. If true the firewall_se_data_rules must also be set"
-  type        = bool
-  default     = "false"
-}
 variable "firewall_se_data_rules" {
-  description = "The ports allowed for Virtual Services hosted on Services Engines. The configure_firewall_se_data variable must be set to true for this rule to be created"
+  description = "The data plane traffic allowed for Virtual Services hosted on Services Engines. The configure_firewall_rules variable must be set to true for these rules to be created"
   type        = list(object({ protocol = string, port = string, allow_ip_range = string, description = string }))
   default     = [{ protocol = "tcp", port = "443", allow_ip_range = "0.0.0.0/0", description = "https" }, { protocol = "udp", port = "53", allow_ip_range = "10.0.0.0/8", description = "DNS" }]
 }

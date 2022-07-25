@@ -135,7 +135,7 @@ resource "aws_security_group" "avi_se_mgmt_sg" {
   }
 }
 resource "aws_security_group" "avi_data_sg" {
-  count       = var.create_firewall_rules ? var.configure_firewall_se_data ? 1 : 0 : 0
+  count       = var.create_firewall_rules ? 1 : 0
   name        = "${var.name_prefix}-avi-data-sg"
   description = "Allow traffic for Avi SE Data NICs"
   vpc_id      = var.create_networking ? aws_vpc.avi[0].id : var.custom_vpc_id

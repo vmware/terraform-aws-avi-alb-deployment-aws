@@ -148,8 +148,8 @@
           max_se: "10"
           se_name_prefix: "{{ name_prefix }}"
           accelerated_networking: true
-          disable_avi_securitygroups: true
 %{ if create_firewall_rules ~}
+          disable_avi_securitygroups: true
           custom_securitygroups_mgmt:
             - "{{ mgmt_security_group }}"
           custom_securitygroups_data:
@@ -177,8 +177,8 @@
           max_se: "10"
           se_name_prefix: "{{ name_prefix }}"
           accelerated_networking: true
-          disable_avi_securitygroups: true
 %{ if create_firewall_rules ~}
+          disable_avi_securitygroups: true
           custom_securitygroups_mgmt:
             - "{{ mgmt_security_group }}"
           custom_securitygroups_data:
@@ -204,8 +204,8 @@
           max_se: "2"
           se_name_prefix: "{{ name_prefix }}_se"
           accelerated_networking: true
-          disable_avi_securitygroups: true
 %{ if create_firewall_rules ~}
+          disable_avi_securitygroups: true
           custom_securitygroups_mgmt:
             - "{{ mgmt_security_group }}"
           custom_securitygroups_data:
