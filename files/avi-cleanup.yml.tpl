@@ -1,7 +1,8 @@
 # Copyright 2022 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
 ---
-- hosts: localhost
+- name: Avi Cleanup Tasks
+  hosts: localhost
   connection: local
   gather_facts: no
   roles:
@@ -23,7 +24,6 @@
     registration_account_id: ${registration_account_id}
     registration_email: ${registration_email}
     registration_jwt: ${registration_jwt}
-    
   tasks:
     - name: Remove all DNS Service Refs from System Configuration
       avi_api_session:
