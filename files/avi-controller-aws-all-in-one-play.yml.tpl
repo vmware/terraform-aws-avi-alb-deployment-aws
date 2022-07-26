@@ -1,7 +1,8 @@
 # Copyright 2022 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
 ---
-- hosts: localhost
+- name: Avi Initial Configuration
+  hosts: localhost
   connection: local
   gather_facts: no
   roles:
@@ -513,4 +514,13 @@
       ansible.builtin.file:
         path: /home/admin/avi_pulse_registration.py
         state: absent
+%{ if split(".", avi_version)[0] == "21" && split(".", avi_version)[2] == "4"  ~}
+    - name: Patch file
+      shell: patch --directory /opt/avi/python/bin/portal/api/ < /home/admin/views_albservices.patch
+    
 %{ endif ~}
+%{ endif ~}
+    - name: Remove patch file
+      ansible.builtin.file:
+        path: /home/admin/views_albservices.patch
+        state: absent

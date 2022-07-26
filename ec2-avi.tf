@@ -37,6 +37,7 @@ locals {
     additional_gslb_sites           = var.additional_gslb_sites
     create_gslb_se_group            = var.create_gslb_se_group
     se_ha_mode                      = var.se_ha_mode
+    upgrade_file_uri                = var.avi_patch_upgrade["upgrade_file_uri"]
   }
   controller_names = aws_instance.avi_controller[*].tags.Name
   controller_ip    = aws_instance.avi_controller[*].private_ip
@@ -124,6 +125,10 @@ resource "null_resource" "ansible_provisioner" {
     destination = "/home/admin/avi_pulse_registration.py"
   }
   provisioner "file" {
+    source      = "${path.module}/files/views_albservices.patch"
+    destination = "/home/admin/views_albservices.patch"
+  }
+  provisioner "file" {
     content = templatefile("${path.module}/files/avi-controller-aws-all-in-one-play.yml.tpl",
     local.cloud_settings)
     destination = "/home/admin/avi-controller-aws-all-in-one-play.yml"
@@ -132,6 +137,11 @@ resource "null_resource" "ansible_provisioner" {
     content = templatefile("${path.module}/files/avi-cloud-services-registration.yml.tpl",
     local.cloud_settings)
     destination = "/home/admin/avi-cloud-services-registration.yml"
+  }
+  provisioner "file" {
+    content = templatefile("${path.module}/files/avi-patch-upgrade.yml.tpl",
+    local.cloud_settings)
+    destination = "/home/admin/avi-patch-upgrade.yml"
   }
   provisioner "file" {
     content = templatefile("${path.module}/files/avi-cleanup.yml.tpl",
@@ -154,5 +164,11 @@ resource "null_resource" "ansible_provisioner" {
       "ansible-playbook avi-cloud-services-registration.yml -e password=${var.controller_password} >> ansible-playbook.log 2>> ansible-error.log",
       "echo Controller Registration Completed"
     ] : ["echo Controller Registration Skipped"]
+  }
+  provisioner "remote-exec" {
+    inline = var.avi_patch_upgrade["enabled"] ? [
+      "ansible-playbook avi-patch-upgrade.yml -e password=${var.controller_password} >> ansible-playbook.log 2>> ansible-error.log",
+      "echo patch upgrade completed"
+    ] : ["echo patch upgrade skipped"]
   }
 }

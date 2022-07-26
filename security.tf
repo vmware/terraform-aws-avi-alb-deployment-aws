@@ -83,22 +83,22 @@ resource "aws_security_group" "avi_se_mgmt_sg" {
   }
   ingress {
     description = "ETHERIP to SE"
-    from_port   = -1
-    to_port     = -1
+    from_port   = 0
+    to_port     = 0
     protocol    = "97"
     cidr_blocks = [var.avi_cidr_block]
   }
   ingress {
     description = "CPHB to SE"
-    from_port   = -1
-    to_port     = -1
+    from_port   = 0
+    to_port     = 0
     protocol    = "73"
     cidr_blocks = [var.avi_cidr_block]
   }
   ingress {
     description = "Proto63 to SE"
-    from_port   = -1
-    to_port     = -1
+    from_port   = 0
+    to_port     = 0
     protocol    = "63"
     cidr_blocks = [var.avi_cidr_block]
   }

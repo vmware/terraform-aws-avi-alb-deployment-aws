@@ -28,6 +28,12 @@ variable "avi_version" {
   description = "The AVI Controller version that will be deployed"
   type        = string
 }
+variable "avi_patch_upgrade" {
+  description = "This variable determines if a patch upgrade is performed after install. The enabled key should be set to true and the url from the Avi Cloud Services portal for the patch should be set for the upgrade_file_uri key"
+  sensitive   = false
+  type        = object({ enabled = bool, upgrade_file_uri = string })
+  default     = { enabled = "false", upgrade_file_uri = "" }
+}
 variable "name_prefix" {
   description = "This prefix is appended to the names of the Controller and SEs"
   type        = string
@@ -101,7 +107,7 @@ variable "create_iam" {
 variable "controller_password" {
   description = "The password that will be used authenticating with the AVI Controller. This password be a minimum of 8 characters and contain at least one each of uppercase, lowercase, numbers, and special characters"
   type        = string
-  sensitive   = true
+  sensitive   = false
   validation {
     condition     = length(var.controller_password) > 7
     error_message = "The controller_password value must be more than 8 characters and contain at least one each of uppercase, lowercase, numbers, and special characters."
