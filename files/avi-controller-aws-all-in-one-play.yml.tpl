@@ -55,10 +55,13 @@
     dns_vs_settings: 
       ${ indent(6, yamlencode(dns_vs_settings))}
 %{ endif ~}
-%{ if configure_gslb && gslb_site_name != "" ~}
+%{ if configure_gslb ~}
     gslb_site_name: ${gslb_site_name}
     additional_gslb_sites:
       ${ indent(6, yamlencode(additional_gslb_sites))}
+%{ endif ~}
+%{ if create_gslb_se_group && configure_gslb != "true" ~}
+    gslb_site_name: ${gslb_site_name}
 %{ endif ~}
   tasks:
     - name: Wait for Controller to become ready
@@ -238,7 +241,7 @@
           add:
             dns_provider_ref: "{{ create_dns.obj.url }}"
 %{ endif }
-%{ if configure_gslb && create_gslb_se_group }
+%{ if configure_gslb || create_gslb_se_group }
     - name: Configure GSLB SE-Group
       avi_api_session:
         avi_credentials: "{{ avi_credentials }}"
@@ -255,7 +258,7 @@
           max_se: "4"
           max_vs_per_se: "1"
           extra_shared_config_memory: 2000
-          se_name_prefix: "{{ gslb_site_name }}"
+          se_name_prefix: "{{ name_prefix }}{{ gslb_site_name }}"
           realtime_se_metrics:
             duration: "60"
             enabled: true
@@ -277,7 +280,7 @@
         data:
           east_west_placement: false
           cloud_ref: "{{ avi_cloud.obj.url }}"
-%{ if configure_gslb && create_gslb_se_group ~}
+%{ if configure_gslb || create_gslb_se_group ~}
           se_group_ref: "{{ gslb_se_group.obj.url }}"
 %{ endif ~}
           vip:
@@ -327,7 +330,7 @@
           application_profile_ref: /api/applicationprofile?name=System-DNS
           network_profile_ref: /api/networkprofile?name=System-UDP-Per-Pkt
           analytics_profile_ref: /api/analyticsprofile?name=System-Analytics-Profile
-          %{ if configure_gslb && create_gslb_se_group }
+          %{ if configure_gslb || create_gslb_se_group }
           se_group_ref: "{{ gslb_se_group.obj.url }}"
           %{ endif}
           cloud_ref: "{{ avi_cloud.obj.url }}"
@@ -351,7 +354,7 @@
         tenant: admin
         dns_virtualservice_refs: "{{ dns_vs.obj.url }}"
 %{ endif}
-%{ if configure_gslb && gslb_site_name != "" }
+%{ if configure_gslb }
     - name: GSLB Config | Verify Cluster UUID
       avi_api_session:
         avi_credentials: "{{ avi_credentials }}"
