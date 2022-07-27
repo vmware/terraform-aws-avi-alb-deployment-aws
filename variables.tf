@@ -28,11 +28,11 @@ variable "avi_version" {
   description = "The AVI Controller version that will be deployed"
   type        = string
 }
-variable "avi_patch_upgrade" {
-  description = "This variable determines if a patch upgrade is performed after install. The enabled key should be set to true and the url from the Avi Cloud Services portal for the patch should be set for the upgrade_file_uri key"
+variable "avi_upgrade" {
+  description = "This variable determines if a patch upgrade is performed after install. The enabled key should be set to true and the url from the Avi Cloud Services portal for the should be set for the upgrade_file_uri key. Valid upgrade_type values are patch or system"
   sensitive   = false
-  type        = object({ enabled = bool, upgrade_file_uri = string })
-  default     = { enabled = "false", upgrade_file_uri = "" }
+  type        = object({ enabled = bool, upgrade_type = string, upgrade_file_uri = string })
+  default     = { enabled = "false", upgrade_type = "patch", upgrade_file_uri = "" }
 }
 variable "name_prefix" {
   description = "This prefix is appended to the names of the Controller and SEs"
