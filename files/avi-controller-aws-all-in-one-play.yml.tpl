@@ -248,13 +248,14 @@
         data:
           name: "g-dns" 
           cloud_ref: "{{ avi_cloud.obj.url }}"
-          ha_mode: HA_MODE_SHARED
+          ha_mode: HA_MODE_SHARED_PAIR
+          min_scaleout_per_vs: 2
           algo: PLACEMENT_ALGO_PACKED
           buffer_se: "0"
           max_se: "4"
           max_vs_per_se: "1"
           extra_shared_config_memory: 2000
-          se_name_prefix: "{{ name_prefix }}"
+          se_name_prefix: "{{ gslb_site_name }}"
           realtime_se_metrics:
             duration: "60"
             enabled: true
