@@ -78,7 +78,9 @@ module "avi_controller_aws_west2" {
   configure_dns_profile = "true"
   dns_service_domain    = "west1.avidemo.net"
   configure_dns_vs      = "true"
-  dns_vs_settings       = { allocate_public_ip = "true", subnet_name           = "companyname-avi-subnet" }
+  dns_vs_settings       = { allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
+  create_gslb_se_group            = "true"
+  gslb_site_name                  = "East1"
 }
 module "avi_controller_aws_east1" {
   source  = "vmware/avi-alb-deployment-aws/aws"
