@@ -123,13 +123,18 @@ variable "boot_disk_size" {
   }
 }
 variable "se_ha_mode" {
-  description = "The HA mode of the Service Engine Group. Possible values active/active, n+m, or active/standby"
+  description = "The HA mode of the default Service Engine Group. Possible values active/active, n+m, or active/standby"
   type        = string
   default     = "active/active"
   validation {
     condition     = contains(["active/active", "n+m", "active/standby"], var.se_ha_mode)
     error_message = "Acceptable values are active/active, n+m, or active/standby."
   }
+}
+variable "se_instance_type" {
+  description = "The instance type of the default Service Engine Group. Possible values can be found at https://aws.amazon.com/ec2/instance-types/"
+  type        = string
+  default     = "c5.large"
 }
 variable "custom_tags" {
   description = "Custom tags added to AWS Resources created by the module"
@@ -213,7 +218,12 @@ variable "additional_gslb_sites" {
   default     = [{ name = "", ip_address_list = [""], dns_vs_name = "DNS-VS" }]
 }
 variable "create_gslb_se_group" {
-  description = "Create a SE group for GSLB. This option only applies when configure_gslb is set to true"
+  description = "Create a SE group for GSLB. The gslb_site_name variable must also be configured. This variable should be set to true for the follower GSLB sites. When configure_gslb is set to true a SE group will be created automatically"
   type        = bool
-  default     = "true"
+  default     = "false"
+}
+variable "gslb_se_instance_type" {
+  description = "The instance_type of the GSLB Service Engine group. The default is 2 vCPU, 8 GB RAM, and a 30 GB Disk per Service Engine. Syntax [\"cpu_cores\", \"memory_in_GB\", \"disk_size_in_GB\"]"
+  type        = string
+  default     = "c5.xlarge"
 }

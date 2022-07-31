@@ -198,6 +198,7 @@ No modules.
 | [aws_ec2_tag.custom_controller_1](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_tag) | resource |
 | [aws_ec2_tag.custom_controller_2](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_tag) | resource |
 | [aws_ec2_tag.custom_controller_3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_tag) | resource |
+| [aws_eip.avi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eip) | resource |
 | [aws_iam_instance_profile.avi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
 | [aws_iam_role.avi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.vmimport](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
@@ -219,6 +220,7 @@ No modules.
 | [aws_subnet.avi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.avi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
 | [null_resource.ansible_provisioner](https://registry.terraform.io/providers/hashicorp/null/3.1.1/docs/resources/resource) | resource |
+| [null_resource.changepassword_provisioner](https://registry.terraform.io/providers/hashicorp/null/3.1.1/docs/resources/resource) | resource |
 | [aws_ami.avi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_availability_zones.azs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 | [aws_subnet.custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
@@ -244,7 +246,7 @@ No modules.
 | <a name="input_controller_password"></a> [controller\_password](#input\_controller\_password) | The password that will be used authenticating with the AVI Controller. This password be a minimum of 8 characters and contain at least one each of uppercase, lowercase, numbers, and special characters | `string` | n/a | yes |
 | <a name="input_controller_public_address"></a> [controller\_public\_address](#input\_controller\_public\_address) | This variable controls if the Controller has a Public IP Address. When set to false the Ansible provisioner will connect to the private IP of the Controller. | `bool` | `"false"` | no |
 | <a name="input_create_firewall_rules"></a> [create\_firewall\_rules](#input\_create\_firewall\_rules) | This variable controls the Security Group creation for the Avi deployment. When set to false the necessary security group rules must be in place before the deployment and set with the firewall\_custom\_security\_group\_ids variable | `bool` | `"true"` | no |
-| <a name="input_create_gslb_se_group"></a> [create\_gslb\_se\_group](#input\_create\_gslb\_se\_group) | Create a SE group for GSLB. This option only applies when configure\_gslb is set to true | `bool` | `"true"` | no |
+| <a name="input_create_gslb_se_group"></a> [create\_gslb\_se\_group](#input\_create\_gslb\_se\_group) | Create a SE group for GSLB. The gslb\_site\_name variable must also be configured. This variable should be set to true for the follower GSLB sites. When configure\_gslb is set to true a SE group will be created automatically | `bool` | `"false"` | no |
 | <a name="input_create_iam"></a> [create\_iam](#input\_create\_iam) | Create IAM policy, roles, and instance profile for Avi AWS Full Access Cloud. If set to false the aws\_access\_key and aws\_secret\_key variables will be used for the Cloud configuration and all policy must be created as found in https://avinetworks.com/docs/latest/iam-role-setup-for-installation-into-aws/ | `bool` | `"true"` | no |
 | <a name="input_create_networking"></a> [create\_networking](#input\_create\_networking) | This variable controls the VPC and subnet creation for the AVI Controller. When set to false the custom-vpc-name and custom-subnetwork-name must be set. | `bool` | `"true"` | no |
 | <a name="input_custom_subnet_ids"></a> [custom\_subnet\_ids](#input\_custom\_subnet\_ids) | This field can be used to specify a list of existing VPC Subnets for the controller and SEs. The create-networking variable must also be set to false for this network to be used. | `list(string)` | `null` | no |
@@ -259,6 +261,7 @@ No modules.
 | <a name="input_firewall_controller_security_group_ids"></a> [firewall\_controller\_security\_group\_ids](#input\_firewall\_controller\_security\_group\_ids) | List of security group IDs that will be assigned to the controller. This variable must be set if the create\_firewall\_rules variable is set to false | `list(string)` | `null` | no |
 | <a name="input_firewall_se_data_rules"></a> [firewall\_se\_data\_rules](#input\_firewall\_se\_data\_rules) | The data plane traffic allowed for Virtual Services hosted on Services Engines. The configure\_firewall\_rules variable must be set to true for these rules to be created | `list(object({ protocol = string, port = string, allow_ip_range = string, description = string }))` | <pre>[<br>  {<br>    "allow_ip_range": "0.0.0.0/0",<br>    "description": "https",<br>    "port": "443",<br>    "protocol": "tcp"<br>  },<br>  {<br>    "allow_ip_range": "10.0.0.0/8",<br>    "description": "DNS",<br>    "port": "53",<br>    "protocol": "udp"<br>  }<br>]</pre> | no |
 | <a name="input_gslb_domains"></a> [gslb\_domains](#input\_gslb\_domains) | A list of GSLB domains that will be configured | `list(string)` | <pre>[<br>  ""<br>]</pre> | no |
+| <a name="input_gslb_se_instance_type"></a> [gslb\_se\_instance\_type](#input\_gslb\_se\_instance\_type) | The instance\_type of the GSLB Service Engine group. The default is 2 vCPU, 8 GB RAM, and a 30 GB Disk per Service Engine. Syntax ["cpu\_cores", "memory\_in\_GB", "disk\_size\_in\_GB"] | `string` | `"c5.xlarge"` | no |
 | <a name="input_gslb_site_name"></a> [gslb\_site\_name](#input\_gslb\_site\_name) | The name of the GSLB site the deployed Controller(s) will be a member of. | `string` | `""` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The EC2 instance type for the Avi Controller | `string` | `"m5.2xlarge"` | no |
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | The name of the existing EC2 Key pair that will be used to authenticate to the Avi Controller | `string` | n/a | yes |
@@ -267,7 +270,8 @@ No modules.
 | <a name="input_private_key_path"></a> [private\_key\_path](#input\_private\_key\_path) | The local private key path for the EC2 Key pair used for authenticating to the Avi Controller | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The Region that the AVI controller and SEs will be deployed to | `string` | n/a | yes |
 | <a name="input_register_controller"></a> [register\_controller](#input\_register\_controller) | If enabled is set to true the controller will be registered and licensed with Avi Cloud Services. The Long Organization ID (organization\_id) can be found from https://console.cloud.vmware.com/csp/gateway/portal/#/organization/info. The jwt\_token can be retrieved at https://portal.avipulse.vmware.com/portal/controller/auth/cspctrllogin | `object({ enabled = bool, jwt_token = string, email = string, organization_id = string })` | <pre>{<br>  "email": "",<br>  "enabled": "false",<br>  "jwt_token": "",<br>  "organization_id": ""<br>}</pre> | no |
-| <a name="input_se_ha_mode"></a> [se\_ha\_mode](#input\_se\_ha\_mode) | The HA mode of the Service Engine Group. Possible values active/active, n+m, or active/standby | `string` | `"active/active"` | no |
+| <a name="input_se_ha_mode"></a> [se\_ha\_mode](#input\_se\_ha\_mode) | The HA mode of the default Service Engine Group. Possible values active/active, n+m, or active/standby | `string` | `"active/active"` | no |
+| <a name="input_se_instance_type"></a> [se\_instance\_type](#input\_se\_instance\_type) | The instance type of the default Service Engine Group. Possible values can be found at https://aws.amazon.com/ec2/instance-types/ | `string` | `"c5.large"` | no |
 
 ## Outputs
 

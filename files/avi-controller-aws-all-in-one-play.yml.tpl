@@ -28,6 +28,7 @@
     aws_region: ${aws_region}
     name_prefix: ${name_prefix}
     se_ha_mode: ${se_ha_mode}
+    se_instance_type: ${se_instance_type}
 %{ if create_firewall_rules ~}
     mgmt_security_group: ${mgmt_security_group}
     data_security_group: ${data_security_group}
@@ -152,6 +153,7 @@
           max_se: "10"
           se_name_prefix: "{{ name_prefix }}"
           accelerated_networking: true
+          instance_flavor: "{{ instance_type }}"
 %{ if create_firewall_rules ~}
           disable_avi_securitygroups: true
           custom_securitygroups_mgmt:
@@ -180,6 +182,7 @@
           buffer_se: "1"
           max_se: "10"
           se_name_prefix: "{{ name_prefix }}"
+          instance_flavor: "{{ instance_type }}"
           accelerated_networking: true
 %{ if create_firewall_rules ~}
           disable_avi_securitygroups: true
@@ -206,7 +209,8 @@
           min_scaleout_per_vs: 1
           buffer_se: "0"
           max_se: "2"
-          se_name_prefix: "{{ name_prefix }}_se"
+          se_name_prefix: "{{ name_prefix }}"
+          instance_flavor: "{{ instance_type }}"
           accelerated_networking: true
 %{ if create_firewall_rules ~}
           disable_avi_securitygroups: true
@@ -258,6 +262,7 @@
           max_se: "4"
           max_vs_per_se: "1"
           extra_shared_config_memory: 2000
+          instance_flavor: "{{ gslb_se_instance_type }}"
           se_name_prefix: "{{ name_prefix }}{{ gslb_site_name }}"
           realtime_se_metrics:
             duration: "60"
@@ -282,6 +287,7 @@
           cloud_ref: "{{ avi_cloud.obj.url }}"
 %{ if configure_gslb || create_gslb_se_group ~}
           se_group_ref: "{{ gslb_se_group.obj.url }}"
+          gslb_se_instance_type: "{{ gslb_se_instance_type }}"
 %{ endif ~}
           vip:
           - enabled: true
@@ -464,8 +470,42 @@
 %{ endfor ~}
                 dns_vses:
                   - dns_vs_uuid: "{{ dns_vs_verify.obj.results.0.uuid }}"
-  %{ endfor }%{ endif }%{ endif ~}
-%{ if controller_ha }
+%{ endfor ~}%{ endif ~}%{ endif ~}
+%{ if register_controller ~}
+
+    - name: Create Ansible collection directory
+      ansible.builtin.file:
+        path: /usr/share/ansible/collections
+        state: directory
+        mode: '0755'
+        owner: admin
+        group: admin
+
+    - name: Install Avi Collection
+      shell: ansible-galaxy collection install vmware.alb -p /usr/share/ansible/collections
+
+    - name: Copy Ansible module file
+      ansible.builtin.copy:
+        src: /home/admin/avi_pulse_registration.py
+        dest: /usr/share/ansible/collections/ansible_collections/vmware/alb/plugins/modules/avi_pulse_registration.py
+    
+    - name: Remove unused module file
+      ansible.builtin.file:
+        path: /home/admin/avi_pulse_registration.py
+        state: absent
+
+%{ if split(".", avi_version)[0] == "21" && split(".", avi_version)[2] == "4"  ~}
+    - name: Patch file
+      shell: patch --directory /opt/avi/python/bin/portal/api/ < /home/admin/views_albservices.patch
+%{ endif ~}
+%{ endif ~}
+
+    - name: Remove patch file
+      ansible.builtin.file:
+        path: /home/admin/views_albservices.patch
+        state: absent
+%{ if controller_ha ~}
+
     - name: Controller Cluster Configuration
       avi_cluster:
         avi_credentials: "{{ avi_credentials }}"
@@ -495,37 +535,4 @@
       retries: 10
       delay: 5
       register: cluster_config
-%{ endif }
-%{ if register_controller ~}
-
-    - name: Create Ansible collection directory
-      ansible.builtin.file:
-        path: /usr/share/ansible/collections
-        state: directory
-        mode: '0755'
-        owner: admin
-        group: admin
-
-    - name: Install Avi Collection
-      shell: ansible-galaxy collection install vmware.alb -p /usr/share/ansible/collections
-
-    - name: Copy Ansible module file
-      ansible.builtin.copy:
-        src: /home/admin/avi_pulse_registration.py
-        dest: /usr/share/ansible/collections/ansible_collections/vmware/alb/plugins/modules/avi_pulse_registration.py
-    
-    - name: Remove unused module file
-      ansible.builtin.file:
-        path: /home/admin/avi_pulse_registration.py
-        state: absent
-
-%{ if split(".", avi_version)[0] == "21" && split(".", avi_version)[2] == "4"  ~}
-    - name: Patch file
-      shell: patch --directory /opt/avi/python/bin/portal/api/ < /home/admin/views_albservices.patch
-    
 %{ endif ~}
-%{ endif ~}
-    - name: Remove patch file
-      ansible.builtin.file:
-        path: /home/admin/views_albservices.patch
-        state: absent

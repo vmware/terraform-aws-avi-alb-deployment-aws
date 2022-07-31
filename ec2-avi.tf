@@ -36,7 +36,9 @@ locals {
     gslb_domains                    = var.gslb_domains
     additional_gslb_sites           = var.additional_gslb_sites
     create_gslb_se_group            = var.create_gslb_se_group
+    gslb_se_instance_type           = var.gslb_se_instance_type
     se_ha_mode                      = var.se_ha_mode
+    se_instance_type                = var.se_instance_type
     upgrade_file_uri                = var.avi_upgrade.upgrade_file_uri
   }
   controller_names = aws_instance.avi_controller[*].tags.Name
@@ -64,29 +66,17 @@ resource "aws_instance" "avi_controller" {
     volume_size           = var.boot_disk_size
     delete_on_termination = true
   }
-  instance_type          = var.instance_type
-  key_name               = var.key_pair_name
-  subnet_id              = var.create_networking ? aws_subnet.avi[count.index].id : var.custom_subnet_ids[count.index]
-  vpc_security_group_ids = var.create_firewall_rules ? [aws_security_group.avi_controller_sg[0].id] : var.firewall_controller_security_group_ids
-  iam_instance_profile   = var.create_iam ? aws_iam_instance_profile.avi[0].id : null
+  instance_type               = var.instance_type
+  key_name                    = var.key_pair_name
+  subnet_id                   = var.create_networking ? aws_subnet.avi[count.index].id : var.custom_subnet_ids[count.index]
+  vpc_security_group_ids      = var.create_firewall_rules ? [aws_security_group.avi_controller_sg[0].id] : var.firewall_controller_security_group_ids
+  iam_instance_profile        = var.create_iam ? aws_iam_instance_profile.avi[0].id : null
+  associate_public_ip_address = false
   tags = {
     Name = "${var.name_prefix}-avi-controller-${count.index + 1}"
   }
   lifecycle {
-    ignore_changes = [tags]
-  }
-  connection {
-    type        = "ssh"
-    host        = var.controller_public_address ? self.public_ip : self.private_ip
-    user        = "admin"
-    timeout     = "600s"
-    private_key = file(var.private_key_path)
-  }
-  provisioner "remote-exec" {
-    inline = [
-      "sleep 180",
-      "sudo /opt/avi/scripts/initialize_admin_user.py --password ${var.controller_password}",
-    ]
+    ignore_changes = [tags, associate_public_ip_address]
   }
 }
 resource "aws_ec2_tag" "custom_controller_1" {
@@ -107,7 +97,8 @@ resource "aws_ec2_tag" "custom_controller_3" {
   key         = each.key
   value       = each.value
 }
-resource "null_resource" "ansible_provisioner" {
+resource "null_resource" "changepassword_provisioner" {
+  count = var.controller_ha ? 3 : 1
   # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     controller_instance_ids = join(",", aws_instance.avi_controller.*.id)
@@ -115,10 +106,32 @@ resource "null_resource" "ansible_provisioner" {
 
   connection {
     type        = "ssh"
-    host        = var.controller_public_address ? aws_instance.avi_controller[0].public_ip : aws_instance.avi_controller[0].private_ip
+    host        = var.controller_public_address ? aws_eip.avi[count.index].public_ip : aws_instance.avi_controller[count.index].private_ip
     user        = "admin"
     timeout     = "600s"
     private_key = file(var.private_key_path)
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "sleep 180",
+      "sudo /opt/avi/scripts/initialize_admin_user.py --password ${var.controller_password}",
+    ]
+  }
+
+}
+resource "null_resource" "ansible_provisioner" {
+  # Changes to any instance of the cluster requires re-provisioning
+  triggers = {
+    controller_instance_ids = join(",", aws_instance.avi_controller.*.id)
+  }
+
+  connection {
+    type     = "ssh"
+    host     = var.controller_public_address ? aws_eip.avi[0].public_ip : aws_instance.avi_controller[0].private_ip
+    user     = "admin"
+    password = var.controller_password
+    timeout  = "600s"
+    #private_key = file(var.private_key_path)
   }
   provisioner "file" {
     source      = "${path.module}/files/avi_pulse_registration.py"

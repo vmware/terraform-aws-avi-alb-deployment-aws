@@ -1,6 +1,15 @@
 # Copyright 2022 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+resource "aws_eip" "avi" {
+  count    = var.controller_public_address ? var.controller_ha ? 3 : 1 : 0
+  instance = aws_instance.avi_controller[count.index].id
+  vpc      = true
+  tags = {
+    Name = "${var.name_prefix}-avi-controller-${count.index + 1}"
+  }
+}
+
 # Create VPC and Subnets for AVI Controller and SEs
 resource "aws_vpc" "avi" {
   count      = var.create_networking ? 1 : 0

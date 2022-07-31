@@ -3,10 +3,11 @@
 
 output "controllers" {
   description = "The AVI Controller(s) Information"
-  value = ([for s in aws_instance.avi_controller : merge(
-    { "name" = s.tags.Name },
-    { "private_ip_address" = s.private_ip },
-    var.controller_public_address ? { "public_ip_address" = s.public_ip } : {}
+  value = (var.controller_public_address ? [for s in aws_eip.avi :
+    { "name" = s.tags.Name, "private_ip_address" = s.private_ip, "public_ip_address" = s.public_ip }
+    ] : [for s in aws_instance.avi_controller : merge(
+      { "name" = s.tags.Name },
+      { "private_ip_address" = s.private_ip }
     )
     ]
   )
