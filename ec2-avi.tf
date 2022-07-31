@@ -76,7 +76,7 @@ resource "aws_instance" "avi_controller" {
     Name = "${var.name_prefix}-avi-controller-${count.index + 1}"
   }
   lifecycle {
-    ignore_changes = [tags, associate_public_ip_address]
+    ignore_changes = [tags, associate_public_ip_address, root_block_device[0].tags]
   }
 }
 resource "aws_ec2_tag" "custom_controller_1" {
