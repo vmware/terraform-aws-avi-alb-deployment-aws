@@ -56,13 +56,14 @@
     dns_vs_settings: 
       ${ indent(6, yamlencode(dns_vs_settings))}
 %{ endif ~}
-%{ if configure_gslb ~}
+%{ if create_gslb_se_group || configure_gslb ~}
     gslb_site_name: ${gslb_site_name}
+    gslb_user: "gslb-admin"
+    gslb_se_instance_type: ${gslb_se_instance_type}
+%{ endif ~}
+%{ if configure_gslb ~}
     additional_gslb_sites:
       ${ indent(6, yamlencode(additional_gslb_sites))}
-%{ endif ~}
-%{ if create_gslb_se_group && configure_gslb != "true" ~}
-    gslb_site_name: ${gslb_site_name}
 %{ endif ~}
   tasks:
     - name: Wait for Controller to become ready
@@ -153,7 +154,7 @@
           max_se: "10"
           se_name_prefix: "{{ name_prefix }}"
           accelerated_networking: true
-          instance_flavor: "{{ instance_type }}"
+          instance_flavor: "{{ se_instance_type }}"
 %{ if create_firewall_rules ~}
           disable_avi_securitygroups: true
           custom_securitygroups_mgmt:
@@ -182,7 +183,7 @@
           buffer_se: "1"
           max_se: "10"
           se_name_prefix: "{{ name_prefix }}"
-          instance_flavor: "{{ instance_type }}"
+          instance_flavor: "{{ se_instance_type }}"
           accelerated_networking: true
 %{ if create_firewall_rules ~}
           disable_avi_securitygroups: true
@@ -210,7 +211,7 @@
           buffer_se: "0"
           max_se: "2"
           se_name_prefix: "{{ name_prefix }}"
-          instance_flavor: "{{ instance_type }}"
+          instance_flavor: "{{ se_instance_type }}"
           accelerated_networking: true
 %{ if create_firewall_rules ~}
           disable_avi_securitygroups: true
@@ -268,8 +269,24 @@
             duration: "60"
             enabled: true
       register: gslb_se_group
-%{ endif }
+
+    - name: Create User for GSLB
+      avi_user:
+        avi_credentials: "{{ avi_credentials }}"
+        default_tenant_ref: "/api/tenant?name=admin"
+        state: present
+        name: "{{ gslb_user }}"
+        access:
+          - all_tenants: true
+            role_ref: "/api/role?name=System-Admin"
+        email: "{{ user_email | default(omit) }}"
+        user_profile_ref: "/api/useraccountprofile?name=No-Lockout-User-Account-Profile"
+        is_superuser: false
+        obj_password: "{{ password }}"
+        obj_username: "{{ gslb_user }}"
+%{ endif ~}
 %{ if configure_dns_vs ~}
+
     - name: DNS VS Config | Get AWS Subnet Information
       avi_api_session:
         avi_credentials: "{{ avi_credentials }}"
@@ -287,7 +304,6 @@
           cloud_ref: "{{ avi_cloud.obj.url }}"
 %{ if configure_gslb || create_gslb_se_group ~}
           se_group_ref: "{{ gslb_se_group.obj.url }}"
-          gslb_se_instance_type: "{{ gslb_se_instance_type }}"
 %{ endif ~}
           vip:
           - enabled: true
@@ -373,7 +389,7 @@
         name: "GSLB"
         sites:
           - name: "{{ gslb_site_name }}"
-            username: "{{ username }}"
+            username: "{{ gslb_user }}"
             password: "{{ password }}"
             ip_addresses:
               - type: "V4"
@@ -402,7 +418,7 @@
     - name: GSLB Config | Verify Remote Site is Ready
       avi_api_session:
         controller: "${site.ip_address_list[0]}"
-        username: "{{ username }}"
+        username: "{{ gslb_user }}"
         password: "{{ password }}"
         api_version: "{{ api_version }}"
         http_method: get
@@ -415,7 +431,7 @@
     - name: GSLB Config | Verify DNS configuration
       avi_api_session:
         controller: "${site.ip_address_list[0]}"
-        username: "{{ username }}"
+        username: "{{ gslb_user }}"
         password: "{{ password }}"
         api_version: "{{ api_version }}"
         http_method: get
@@ -437,7 +453,7 @@
         path: gslbsiteops/verify
         data:
           name: name
-          username: admin
+          username: "{{ gslb_user }}"
           password: "{{ password }}"
           port: 443
           ip_addresses:
@@ -460,7 +476,7 @@
             sites:
               - name: "${site.name}"
                 member_type: "GSLB_ACTIVE_MEMBER"
-                username: "{{ username }}"
+                username: "{{ gslb_user }}"
                 password: "{{ password }}"
                 cluster_uuid: "{{ gslb_verify.obj.rx_uuid }}"
                 ip_addresses:
@@ -471,39 +487,6 @@
                 dns_vses:
                   - dns_vs_uuid: "{{ dns_vs_verify.obj.results.0.uuid }}"
 %{ endfor ~}%{ endif ~}%{ endif ~}
-%{ if register_controller ~}
-
-    - name: Create Ansible collection directory
-      ansible.builtin.file:
-        path: /usr/share/ansible/collections
-        state: directory
-        mode: '0755'
-        owner: admin
-        group: admin
-
-    - name: Install Avi Collection
-      shell: ansible-galaxy collection install vmware.alb -p /usr/share/ansible/collections
-
-    - name: Copy Ansible module file
-      ansible.builtin.copy:
-        src: /home/admin/avi_pulse_registration.py
-        dest: /usr/share/ansible/collections/ansible_collections/vmware/alb/plugins/modules/avi_pulse_registration.py
-    
-    - name: Remove unused module file
-      ansible.builtin.file:
-        path: /home/admin/avi_pulse_registration.py
-        state: absent
-
-%{ if split(".", avi_version)[0] == "21" && split(".", avi_version)[2] == "4"  ~}
-    - name: Patch file
-      shell: patch --directory /opt/avi/python/bin/portal/api/ < /home/admin/views_albservices.patch
-%{ endif ~}
-%{ endif ~}
-
-    - name: Remove patch file
-      ansible.builtin.file:
-        path: /home/admin/views_albservices.patch
-        state: absent
 %{ if controller_ha ~}
 
     - name: Controller Cluster Configuration
@@ -529,10 +512,76 @@
               ip:
                 type: V4
                 addr: "{{ controller_ip[2] }}"
+%{ if configure_gslb || create_gslb_se_group ~}
+        name: "{{ name_prefix }}-{{ gslb_site_name }}-cluster"
+%{ else ~}
         name: "{{ name_prefix }}-cluster"
+%{ endif ~}
         tenant_uuid: "admin"
       until: cluster_config is not failed
       retries: 10
       delay: 5
       register: cluster_config
+%{ endif ~}
+%{ if register_controller.enabled ~}
+
+    - name: Create Ansible collection directory
+      ansible.builtin.file:
+        path: /usr/share/ansible/collections
+        state: directory
+        mode: '0755'
+        owner: admin
+        group: admin
+
+    - name: Install Avi Collection
+      #shell: ansible-galaxy collection install vmware.alb -p /usr/share/ansible/collections
+      shell: ansible-galaxy collection install vmware.alb -p /home/admin/.ansible/collections
+
+
+    - name: Copy Ansible module file
+      ansible.builtin.copy:
+        src: /home/admin/avi_pulse_registration.py
+        #dest: /usr/share/ansible/collections/ansible_collections/vmware/alb/plugins/modules/avi_pulse_registration.py
+        dest: /home/admin/.ansible/collections/ansible_collections/vmware/alb/plugins/modules/avi_pulse_registration.py
+    
+    - name: Remove unused module file
+      ansible.builtin.file:
+        path: /home/admin/avi_pulse_registration.py
+        state: absent
+
+%{ if split(".", avi_version)[0] == "21" && split(".", avi_version)[2] == "4"  ~}
+    - name: Patch file
+      shell: patch --directory /opt/avi/python/bin/portal/api/ < /home/admin/views_albservices.patch
+%{ endif ~}
+%{ endif ~}
+
+    - name: Remove patch file
+      ansible.builtin.file:
+        path: /home/admin/views_albservices.patch
+        state: absent
+
+%{ if avi_upgrade.enabled || register_controller.enabled  ~}
+    - name: Pause for 7 minutes for Cluster to form
+      ansible.builtin.pause:
+        minutes: 7
+    
+    - name: Wait for Avi Cluster to be ready
+      avi_api_session:
+        avi_credentials: "{{ avi_credentials }}"
+        http_method: get
+        path: "cluster/runtime"
+      until: cluster_check is not failed
+      retries: 60
+      delay: 10
+      register: cluster_check
+
+    - name: Wait for Avi Cluster to be ready
+      avi_api_session:
+        avi_credentials: "{{ avi_credentials }}"
+        http_method: get
+        path: "cluster/runtime"
+      until: cluster_runtime.obj.cluster_state.state == "CLUSTER_UP_HA_ACTIVE"
+      retries: 60
+      delay: 10
+      register: cluster_runtime
 %{ endif ~}

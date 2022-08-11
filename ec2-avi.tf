@@ -18,10 +18,7 @@ locals {
     mgmt_security_group             = var.create_firewall_rules ? aws_security_group.avi_se_mgmt_sg[0].id : ""
     data_security_group             = var.create_firewall_rules ? aws_security_group.avi_data_sg[0].id : ""
     controller_ha                   = var.controller_ha
-    register_controller             = var.register_controller.enabled
-    registration_jwt                = var.register_controller.jwt_token
-    registration_email              = var.register_controller.email
-    registration_account_id         = var.register_controller.organization_id
+    register_controller             = var.register_controller
     controller_ip                   = local.controller_ip
     controller_names                = local.controller_names
     configure_dns_route_53          = var.configure_dns_route_53
@@ -39,7 +36,7 @@ locals {
     gslb_se_instance_type           = var.gslb_se_instance_type
     se_ha_mode                      = var.se_ha_mode
     se_instance_type                = var.se_instance_type
-    upgrade_file_uri                = var.avi_upgrade.upgrade_file_uri
+    avi_upgrade                     = var.avi_upgrade
   }
   controller_names = aws_instance.avi_controller[*].tags.Name
   controller_ip    = aws_instance.avi_controller[*].private_ip
