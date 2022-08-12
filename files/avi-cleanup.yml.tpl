@@ -23,6 +23,9 @@
     tenant_name: "admin"
     register_controller:
       ${ indent(6, yamlencode(register_controller))}
+%{ if configure_gslb || create_gslb_se_group ~}
+    gslb_site_name: ${gslb_site_name}
+%{ endif ~}
   tasks:
     - name: Remove all DNS Service Refs from System Configuration
       avi_api_session:
