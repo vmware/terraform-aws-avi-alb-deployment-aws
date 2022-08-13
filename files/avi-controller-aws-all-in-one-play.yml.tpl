@@ -61,7 +61,7 @@
     gslb_user: "gslb-admin"
     gslb_se_instance_type: ${gslb_se_instance_type}
 %{ endif ~}
-%{ if configure_gslb ~}
+%{ if configure_gslb_additional_sites ~}
     additional_gslb_sites:
       ${ indent(6, yamlencode(additional_gslb_sites))}
 %{ endif ~}
@@ -525,23 +525,12 @@
 %{ endif ~}
 %{ if register_controller.enabled ~}
 
-    - name: Create Ansible collection directory
-      ansible.builtin.file:
-        path: /usr/share/ansible/collections
-        state: directory
-        mode: '0755'
-        owner: admin
-        group: admin
-
     - name: Install Avi Collection
-      #shell: ansible-galaxy collection install vmware.alb -p /usr/share/ansible/collections
       shell: ansible-galaxy collection install vmware.alb -p /home/admin/.ansible/collections
-
 
     - name: Copy Ansible module file
       ansible.builtin.copy:
         src: /home/admin/avi_pulse_registration.py
-        #dest: /usr/share/ansible/collections/ansible_collections/vmware/alb/plugins/modules/avi_pulse_registration.py
         dest: /home/admin/.ansible/collections/ansible_collections/vmware/alb/plugins/modules/avi_pulse_registration.py
     
     - name: Remove unused module file
