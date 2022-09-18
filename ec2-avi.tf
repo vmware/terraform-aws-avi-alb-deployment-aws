@@ -22,7 +22,6 @@ locals {
     controller_ip                   = local.controller_ip
     controller_names                = local.controller_names
     configure_dns_route_53          = var.configure_dns_route_53
-    configure_cloud                 = var.configure_cloud
     configure_dns_profile           = var.configure_dns_profile
     dns_service_domain              = var.dns_service_domain
     configure_dns_vs                = var.configure_dns_vs
@@ -159,13 +158,17 @@ resource "null_resource" "ansible_provisioner" {
     destination = "/home/admin/avi-cleanup.yml"
   }
   provisioner "remote-exec" {
-    inline = var.create_iam ? [
+    inline = var.configure_controller ? var.create_iam ? [
       "sleep 30",
       "ansible-playbook avi-controller-aws-all-in-one-play.yml -e password=${var.controller_password} 2> ansible-error.log | tee ansible-playbook.log",
       "echo Controller Configuration Completed"
       ] : [
       "sleep 30",
       "ansible-playbook avi-controller-aws-all-in-one-play.yml -e password=${var.controller_password} -e aws_access_key_id=${var.aws_access_key} -e aws_secret_access_key=${var.aws_secret_key} 2> ansible-error.log | tee ansible-playbook.log",
+      "echo Controller Configuration Completed"
+      ] : [
+      "sleep 30",
+      "ansible-playbook avi-controller-aws-all-in-one-play.yml -e password=${var.controller_password} --tags register_controller 2> ansible-error.log | tee ansible-playbook.log",
       "echo Controller Configuration Completed"
     ]
   }
