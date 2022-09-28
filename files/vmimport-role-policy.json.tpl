@@ -7,14 +7,14 @@
             "s3:ListBucket",
             "s3:GetBucketLocation"
          ],
-         "Resource": "arn:aws:s3:::avi-se-*"
+         "Resource": "arn:${awsPartition}:s3:::avi-se-*"
       },
       {
          "Effect":"Allow",
          "Action":[
             "s3:GetObject"
          ],
-         "Resource": "arn:aws:s3:::avi-se-*/*"
+         "Resource": "arn:${awsPartition}:s3:::avi-se-*/*"
       },
       {
          "Effect":"Allow",

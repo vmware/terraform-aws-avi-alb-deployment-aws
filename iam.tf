@@ -25,14 +25,14 @@ resource "aws_iam_role_policy" "avi_vmimport_policy" {
   name  = "${var.name_prefix}-avi-vmimport-policy"
   role  = aws_iam_role.vmimport[0].id
 
-  policy = file("${path.module}/files/vmimport-role-policy.json")
+  policy = templatefile("${path.module}/files/vmimport-role-policy.json.tpl",{awsPartition = data.aws_partition.current.partition})
 }
 resource "aws_iam_role_policy" "avi_vmimport_kms_policy" {
   count = var.create_iam ? 1 : 0
   name  = "${var.name_prefix}-avicontroller-kms-vmimport-policy"
   role  = aws_iam_role.vmimport[0].id
 
-  policy = file("${path.module}/files/avicontroller-kms-vmimport.json")
+  policy = templatefile("${path.module}/files/avicontroller-kms-vmimport.json.tpl",{awsPartition = data.aws_partition.current.partition})
 }
 resource "aws_iam_role_policy" "avi_ec2" {
   count = var.create_iam ? 1 : 0
@@ -46,21 +46,21 @@ resource "aws_iam_role_policy" "avi_iam" {
   name  = "${var.name_prefix}-avicontroller-iam-policy"
   role  = aws_iam_role.avi[0].id
 
-  policy = file("${path.module}/files/avicontroller-iam-policy.json")
+  policy = templatefile("${path.module}/files/avicontroller-iam-policy.json.tpl",{awsPartition = data.aws_partition.current.partition})
 }
 resource "aws_iam_role_policy" "avi_s3" {
   count = var.create_iam ? 1 : 0
   name  = "${var.name_prefix}-avicontroller-s3-policy"
   role  = aws_iam_role.avi[0].id
 
-  policy = file("${path.module}/files/avicontroller-s3-policy.json")
+  policy = templatefile("${path.module}/files/avicontroller-s3-policy.json.tpl",{awsPartition = data.aws_partition.current.partition})
 }
 resource "aws_iam_role_policy" "avi_r53" {
   count = var.create_iam ? 1 : 0
   name  = "${var.name_prefix}-avicontroller-r53-policy"
   role  = aws_iam_role.avi[0].id
 
-  policy = file("${path.module}/files/avicontroller-r53-policy.json")
+  policy = templatefile("${path.module}/files/avicontroller-r53-policy.json.tpl",{awsPartition = data.aws_partition.current.partition})
 }
 resource "aws_iam_role_policy" "avi_autoscaling" {
   count = var.create_iam ? 1 : 0
@@ -74,12 +74,12 @@ resource "aws_iam_role_policy" "avi_sqs_sns" {
   name  = "${var.name_prefix}-avicontroller-sqs-sns-policy"
   role  = aws_iam_role.avi[0].id
 
-  policy = file("${path.module}/files/avicontroller-sqs-sns-policy.json")
+  policy = templatefile("${path.module}/files/avicontroller-sqs-sns-policy.json.tpl",{awsPartition = data.aws_partition.current.partition})
 }
 resource "aws_iam_role_policy" "avi_kms" {
   count = var.create_iam ? 1 : 0
   name  = "${var.name_prefix}-avicontroller-kms-policy"
   role  = aws_iam_role.avi[0].id
 
-  policy = file("${path.module}/files/avicontroller-kms-policy.json")
+  policy = templatefile("${path.module}/files/avicontroller-kms-policy.json.tpl",{awsPartition = data.aws_partition.current.partition})
 }

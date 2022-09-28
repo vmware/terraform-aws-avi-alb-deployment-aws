@@ -19,7 +19,7 @@
                 "s3:ListBucketMultipartUploads",
                 "s3:PutBucketTagging"
             ],
-            "Resource": "arn:aws:s3:::avi-se-*"
+            "Resource": "arn:${awsPartition}:s3:::avi-se-*"
         },
         {
             "Sid": "VisualEditor2",
@@ -31,7 +31,7 @@
                 "s3:GetObject",
                 "s3:PutObject"
             ],
-            "Resource": "arn:aws:s3:::avi-se-*/*"
+            "Resource": "arn:${awsPartition}:s3:::avi-se-*/*"
         }
     ]
 }

@@ -17,3 +17,4 @@ data "aws_ami" "avi" {
     values = ["Avi*Controller-${var.avi_version}-*"]
   }
 }
+data "aws_partition" "current" {}

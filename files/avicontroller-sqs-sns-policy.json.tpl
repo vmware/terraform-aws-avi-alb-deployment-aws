@@ -30,13 +30,13 @@
               "sqs:TagQueue",
               "sqs:UntagQueue"
           ],
-          "Resource": "arn:aws:sqs:*:*:avi-sqs-cloud-*"
+          "Resource": "arn:${awsPartition}:sqs:*:*:avi-sqs-cloud-*"
       },
       {
           "Sid": "VisualEditor2",
           "Effect": "Allow",
           "Action": "sns:Subscribe",
-          "Resource": "arn:aws:sns:*:*:avi-asg-cloud-*"
+          "Resource": "arn:${awsPartition}:sns:*:*:avi-asg-cloud-*"
       },
       {
           "Sid": "VisualEditor3",
@@ -60,7 +60,7 @@
               "sns:Publish",
               "sns:SetTopicAttributes"
           ],
-          "Resource": "arn:aws:sns:*:*:avi-asg-cloud-*"
+          "Resource": "arn:${awsPartition}:sns:*:*:avi-asg-cloud-*"
       }
   ]
 }
