@@ -9,11 +9,13 @@ variable "aws_access_key" {
   description = "The Access Key that will be used to deploy AWS resources"
   type        = string
   sensitive   = false
+  default     = ""
 }
 variable "aws_secret_key" {
   description = "The Secret Key that will be used to deploy AWS resources"
   type        = string
   sensitive   = false
+  default     = ""
 }
 variable "key_pair_name" {
   description = "The name of the existing EC2 Key pair that will be used to authenticate to the Avi Controller"
