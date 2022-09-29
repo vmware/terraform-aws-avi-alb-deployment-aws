@@ -101,7 +101,12 @@ resource "null_resource" "changepassword_provisioner" {
   triggers = {
     controller_instance_ids = join(",", aws_instance.avi_controller.*.id)
   }
-
+  lifecycle {
+    precondition {
+      condition = local.private_key != null
+      error_message = "Must provide a value for either private_key_path or private_key_contents."
+    }
+  }
   connection {
     type        = "ssh"
     host        = var.controller_public_address ? aws_eip.avi[count.index].public_ip : aws_instance.avi_controller[count.index].private_ip
@@ -123,6 +128,12 @@ resource "null_resource" "ansible_provisioner" {
     controller_instance_ids = join(",", aws_instance.avi_controller.*.id)
   }
   depends_on = [null_resource.changepassword_provisioner]
+  lifecycle {
+    precondition {
+      condition = local.private_key != null
+      error_message = "Must provide a value for either private_key_path or private_key_contents."
+    }
+  }
   connection {
     type     = "ssh"
     host     = var.controller_public_address ? aws_eip.avi[0].public_ip : aws_instance.avi_controller[0].private_ip
