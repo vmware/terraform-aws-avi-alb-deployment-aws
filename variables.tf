@@ -164,7 +164,7 @@ variable "email_config" {
   type        = object({ smtp_type = string, from_email = string, mail_server_name = string, mail_server_port = string, auth_username = string, auth_password = string })
   default     = { smtp_type = "SMTP_LOCAL_HOST", from_email = "admin@avicontroller.net", mail_server_name = "localhost", mail_server_port = "25", auth_username = "", auth_password = "" }
 }
-variable "configure_cloud" {
+variable "configure_controller" {
   description = "Configure the Avi Cloud via Ansible after controller deployment. If not set to true this must be done manually with the desired config"
   type        = bool
   default     = "true"
