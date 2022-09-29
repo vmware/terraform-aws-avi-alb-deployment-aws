@@ -67,10 +67,14 @@
 %{ endif ~}
   tasks:
     - name: Wait for Controller to become ready
-      wait_for:
-        port: 443
-        timeout: 600
-        sleep: 30
+      uri:
+        url: "https://localhost/api/initial-data"
+        validate_certs: no
+        status_code: 200
+      register: result
+      until: result.status == 200
+      retries: 300
+      delay: 10          
     - name: Configure System Configurations
       avi_systemconfiguration:
         avi_credentials: "{{ avi_credentials }}"
