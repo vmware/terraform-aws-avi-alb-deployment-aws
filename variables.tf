@@ -104,6 +104,11 @@ variable "custom_subnet_ids" {
   type        = list(string)
   default     = null
 }
+variable "custom_controller_name" {
+  description = "This field can be used to specify a custom controller name to replace the (prefix-avi-controller) standard name.  A numeric iterator will still be appended to the custom name (1,2,3)"
+  type        = string
+  default     = null
+}
 variable "create_iam" {
   description = "Create IAM policy, roles, and instance profile for Avi AWS Full Access Cloud. If set to false the aws_access_key and aws_secret_key variables will be used for the Cloud configuration and all policy must be created as found in https://avinetworks.com/docs/latest/iam-role-setup-for-installation-into-aws/"
   type        = bool
