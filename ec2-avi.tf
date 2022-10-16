@@ -113,21 +113,21 @@ resource "null_resource" "changepassword_provisioner" {
       "sudo /opt/avi/scripts/initialize_admin_user.py --password ${var.controller_password}",
     ]
   }
-
+  
 }
 resource "null_resource" "ansible_provisioner" {
   # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     controller_instance_ids = join(",", aws_instance.avi_controller.*.id)
   }
-
+  depends_on = [null_resource.changepassword_provisioner]
   connection {
     type     = "ssh"
     host     = var.controller_public_address ? aws_eip.avi[0].public_ip : aws_instance.avi_controller[0].private_ip
     user     = "admin"
-    password = var.controller_password
+    #password = var.controller_password
     timeout  = "600s"
-    #private_key = file(var.private_key_path)
+    private_key = file(var.private_key_path)
   }
   provisioner "file" {
     source      = "${path.module}/files/avi_pulse_registration.py"
