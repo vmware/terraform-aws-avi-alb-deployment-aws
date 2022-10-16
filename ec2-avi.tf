@@ -70,7 +70,7 @@ resource "aws_instance" "avi_controller" {
   iam_instance_profile        = var.create_iam ? aws_iam_instance_profile.avi[0].id : null
   associate_public_ip_address = false
   tags = {
-    Name = "${var.name_prefix}-avi-controller-${count.index + 1}"
+    Name = (var.custom_controller_name != null) ? "${var.custom_controller_name}-${count.index + 1}" : "${var.name_prefix}-avi-controller-${count.index + 1}"
   }
   lifecycle {
     ignore_changes = [tags, associate_public_ip_address, root_block_device[0].tags]

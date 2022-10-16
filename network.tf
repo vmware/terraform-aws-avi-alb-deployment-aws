@@ -6,7 +6,7 @@ resource "aws_eip" "avi" {
   instance = aws_instance.avi_controller[count.index].id
   vpc      = true
   tags = {
-    Name = "${var.name_prefix}-avi-controller-${count.index + 1}"
+    Name = (var.custom_controller_name != null) ? "${var.custom_controller_name}-${count.index + 1}" : "${var.name_prefix}-avi-controller-${count.index + 1}"
   }
 }
 
