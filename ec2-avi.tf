@@ -39,6 +39,7 @@ locals {
   }
   controller_names = aws_instance.avi_controller[*].tags.Name
   controller_ip    = aws_instance.avi_controller[*].private_ip
+  private_key      = var.private_key_path != null ? file(var.private_key_path) : var.private_key_contents
 
   mgmt_subnets = { for subnet in aws_subnet.avi : subnet.availability_zone =>
     {
@@ -99,13 +100,18 @@ resource "null_resource" "changepassword_provisioner" {
   triggers = {
     controller_instance_ids = join(",", aws_instance.avi_controller.*.id)
   }
-
+  lifecycle {
+    precondition {
+      condition = local.private_key != null
+      error_message = "Must provide a value for either private_key_path or private_key_contents."
+    }
+  }
   connection {
     type        = "ssh"
     host        = var.controller_public_address ? aws_eip.avi[count.index].public_ip : aws_instance.avi_controller[count.index].private_ip
     user        = "admin"
     timeout     = "600s"
-    private_key = file(var.private_key_path)
+    private_key = local.private_key
   }
   provisioner "remote-exec" {
     inline = [
@@ -113,7 +119,7 @@ resource "null_resource" "changepassword_provisioner" {
       "sudo /opt/avi/scripts/initialize_admin_user.py --password ${var.controller_password}",
     ]
   }
-  
+
 }
 resource "null_resource" "ansible_provisioner" {
   # Changes to any instance of the cluster requires re-provisioning
@@ -121,13 +127,19 @@ resource "null_resource" "ansible_provisioner" {
     controller_instance_ids = join(",", aws_instance.avi_controller.*.id)
   }
   depends_on = [null_resource.changepassword_provisioner]
+  lifecycle {
+    precondition {
+      condition = local.private_key != null
+      error_message = "Must provide a value for either private_key_path or private_key_contents."
+    }
+  }
   connection {
     type     = "ssh"
     host     = var.controller_public_address ? aws_eip.avi[0].public_ip : aws_instance.avi_controller[0].private_ip
     user     = "admin"
     #password = var.controller_password
     timeout  = "600s"
-    private_key = file(var.private_key_path)
+    private_key = local.private_key
   }
   provisioner "file" {
     source      = "${path.module}/files/avi_pulse_registration.py"
