@@ -30,10 +30,8 @@ module "avi_controller_aws" {
   version = "1.0.x"
 
   region = "us-west-1"
-  aws_access_key = "<access-key>"
-  aws_secret_key = "<secret-key>"
   create_networking = "false"
-  create_iam = "false"
+  create_iam = "true"
   avi_version = "22.1.1"
   custom_vpc_id = "vpc-<id>"
   custom_subnet_ids = ["subnet-<id>","subnet-<id>","subnet-<id>"]
@@ -60,10 +58,8 @@ module "avi_controller_aws_west2" {
   version               = "1.0.x"
 
   region                = "us-west-2"
-  aws_access_key        = "<access-key>"
-  aws_secret_key        = "<secret-key>"
   create_networking     = "false"
-  create_iam            = "false"
+  create_iam            = "true"
   controller_ha         = true
   avi_version           = "22.1.1"
   custom_vpc_id         = "vpc-<id>"
@@ -87,10 +83,8 @@ module "avi_controller_aws_east1" {
   version = "1.0.x"
 
   region                          = "us-east-1"
-  aws_access_key                  = "<access-key>"
-  aws_secret_key                  = "<secret-key>"
   create_networking               = "false"
-  create_iam                      = "false"
+  create_iam                      = "true"
   controller_ha                   = true
   avi_version                     = "22.1.1"
   custom_vpc_id                   = "vpc-<id>"
