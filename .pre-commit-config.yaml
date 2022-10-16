@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 repos:
-  - repo: git://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.44.0
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.76.0
     hooks:
       - id: terraform_fmt
       - id: terraform_validate

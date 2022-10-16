@@ -102,7 +102,7 @@ resource "null_resource" "changepassword_provisioner" {
   }
   lifecycle {
     precondition {
-      condition = local.private_key != null
+      condition     = local.private_key != null
       error_message = "Must provide a value for either private_key_path or private_key_contents."
     }
   }
@@ -129,16 +129,16 @@ resource "null_resource" "ansible_provisioner" {
   depends_on = [null_resource.changepassword_provisioner]
   lifecycle {
     precondition {
-      condition = local.private_key != null
+      condition     = local.private_key != null
       error_message = "Must provide a value for either private_key_path or private_key_contents."
     }
   }
   connection {
-    type     = "ssh"
-    host     = var.controller_public_address ? aws_eip.avi[0].public_ip : aws_instance.avi_controller[0].private_ip
-    user     = "admin"
+    type = "ssh"
+    host = var.controller_public_address ? aws_eip.avi[0].public_ip : aws_instance.avi_controller[0].private_ip
+    user = "admin"
     #password = var.controller_password
-    timeout  = "600s"
+    timeout     = "600s"
     private_key = local.private_key
   }
   provisioner "file" {

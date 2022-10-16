@@ -170,7 +170,7 @@ The terraform-aws-avi-alb-deployment-aws project team welcomes contributions fro
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.2.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.22.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | 3.1.1 |
 
@@ -217,6 +217,7 @@ No modules.
 | [null_resource.changepassword_provisioner](https://registry.terraform.io/providers/hashicorp/null/3.1.1/docs/resources/resource) | resource |
 | [aws_ami.avi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_availability_zones.azs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
+| [aws_partition.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
 | [aws_subnet.custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 
 ## Inputs
@@ -227,8 +228,8 @@ No modules.
 | <a name="input_avi_cidr_block"></a> [avi\_cidr\_block](#input\_avi\_cidr\_block) | This CIDR that will be used for creating a subnet in the AVI VPC - a /16 should be provided. This range is also used for security group rules source IP range for internal communication between the Controllers and SEs | `string` | `"10.255.0.0/16"` | no |
 | <a name="input_avi_upgrade"></a> [avi\_upgrade](#input\_avi\_upgrade) | This variable determines if a patch upgrade is performed after install. The enabled key should be set to true and the url from the Avi Cloud Services portal for the should be set for the upgrade\_file\_uri key. Valid upgrade\_type values are patch or system | `object({ enabled = bool, upgrade_type = string, upgrade_file_uri = string })` | <pre>{<br>  "enabled": "false",<br>  "upgrade_file_uri": "",<br>  "upgrade_type": "patch"<br>}</pre> | no |
 | <a name="input_avi_version"></a> [avi\_version](#input\_avi\_version) | The AVI Controller version that will be deployed | `string` | n/a | yes |
-| <a name="input_aws_access_key"></a> [aws\_access\_key](#input\_aws\_access\_key) | The Access Key that will be used to deploy AWS resources.  Must have value if create_iam is set to true | `string` | null | no |
-| <a name="input_aws_secret_key"></a> [aws\_secret\_key](#input\_aws\_secret\_key) | The Secret Key that will be used to deploy AWS resources.  Must have value if create_iam is set to true | `string` | null | no |
+| <a name="input_aws_access_key"></a> [aws\_access\_key](#input\_aws\_access\_key) | The Access Key that will be used to deploy AWS resources | `string` | `""` | no |
+| <a name="input_aws_secret_key"></a> [aws\_secret\_key](#input\_aws\_secret\_key) | The Secret Key that will be used to deploy AWS resources | `string` | `""` | no |
 | <a name="input_boot_disk_size"></a> [boot\_disk\_size](#input\_boot\_disk\_size) | The boot disk size for the Avi controller | `number` | `128` | no |
 | <a name="input_configure_controller"></a> [configure\_controller](#input\_configure\_controller) | Configure the Avi Cloud via Ansible after controller deployment. If not set to true this must be done manually with the desired config | `bool` | `"true"` | no |
 | <a name="input_configure_dns_profile"></a> [configure\_dns\_profile](#input\_configure\_dns\_profile) | Configure Avi DNS Profile for DNS Record Creation for Virtual Services. If set to true the dns\_service\_domain variable must also be set | `bool` | `"false"` | no |
@@ -243,7 +244,7 @@ No modules.
 | <a name="input_create_gslb_se_group"></a> [create\_gslb\_se\_group](#input\_create\_gslb\_se\_group) | Create a SE group for GSLB. The gslb\_site\_name variable must also be configured. This variable should be set to true for the follower GSLB sites. When configure\_gslb is set to true a SE group will be created automatically | `bool` | `"false"` | no |
 | <a name="input_create_iam"></a> [create\_iam](#input\_create\_iam) | Create IAM policy, roles, and instance profile for Avi AWS Full Access Cloud. If set to false the aws\_access\_key and aws\_secret\_key variables will be used for the Cloud configuration and all policy must be created as found in https://avinetworks.com/docs/latest/iam-role-setup-for-installation-into-aws/ | `bool` | `"true"` | no |
 | <a name="input_create_networking"></a> [create\_networking](#input\_create\_networking) | This variable controls the VPC and subnet creation for the AVI Controller. When set to false the custom-vpc-name and custom-subnetwork-name must be set. | `bool` | `"true"` | no |
-| <a name="input_custom_controller_name"></a> [custom\_controller\_name](#input\_custom\_controller\_name) | This field can be used to specify a custom name for the EC2 Controller instances replacing the "<prefix\>-avi-controller" standard name. | `string` | `null` | no |
+| <a name="input_custom_controller_name"></a> [custom\_controller\_name](#input\_custom\_controller\_name) | This field can be used to specify a custom controller name to replace the (prefix-avi-controller) standard name.  A numeric iterator will still be appended to the custom name (1,2,3) | `string` | `null` | no |
 | <a name="input_custom_subnet_ids"></a> [custom\_subnet\_ids](#input\_custom\_subnet\_ids) | This field can be used to specify a list of existing VPC Subnets for the controller and SEs. The create-networking variable must also be set to false for this network to be used. | `list(string)` | `null` | no |
 | <a name="input_custom_tags"></a> [custom\_tags](#input\_custom\_tags) | Custom tags added to AWS Resources created by the module | `map(string)` | `{}` | no |
 | <a name="input_custom_vpc_id"></a> [custom\_vpc\_id](#input\_custom\_vpc\_id) | This field can be used to specify an existing VPC for the controller and SEs. The create-networking variable must also be set to false for this network to be used. | `string` | `null` | no |
@@ -262,8 +263,8 @@ No modules.
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | The name of the existing EC2 Key pair that will be used to authenticate to the Avi Controller | `string` | n/a | yes |
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | This prefix is appended to the names of the Controller and SEs | `string` | n/a | yes |
 | <a name="input_ntp_servers"></a> [ntp\_servers](#input\_ntp\_servers) | The NTP Servers that the Avi Controllers will use. The server should be a valid IP address (v4 or v6) or a DNS name. Valid options for type are V4, DNS, or V6 | `list(object({ addr = string, type = string }))` | <pre>[<br>  {<br>    "addr": "0.us.pool.ntp.org",<br>    "type": "DNS"<br>  },<br>  {<br>    "addr": "1.us.pool.ntp.org",<br>    "type": "DNS"<br>  },<br>  {<br>    "addr": "2.us.pool.ntp.org",<br>    "type": "DNS"<br>  },<br>  {<br>    "addr": "3.us.pool.ntp.org",<br>    "type": "DNS"<br>  }<br>]</pre> | no |
-| <a name="input_private_key_path"></a> [private\_key\_path](#input\_private\_key\_path) | The local private key path for the EC2 Key pair used for authenticating to the Avi Controller.  Either private_key_path or private_key_contents must be provided.  If both are provided private_key_path will be used. | `string` | n/a | no |
-| <a name="input_private_key_contents"></a> [private\_key\_contents](#input\_private\_key\_contents) | The local private key contents for the EC2 Key pair used for authenticating to the Avi Controller.  Either private_key_path or private_key_contents must be provided.  If both are provided private_key_contents will be ignored. | `string` | n/a | no |
+| <a name="input_private_key_contents"></a> [private\_key\_contents](#input\_private\_key\_contents) | The contents of the private key for the EC2 Key pair used for authenticating to the Avi Controller. Either private\_key\_path or private\_key\_contents must be supplied. | `string` | `null` | no |
+| <a name="input_private_key_path"></a> [private\_key\_path](#input\_private\_key\_path) | The local private key path for the EC2 Key pair used for authenticating to the Avi Controller. Either private\_key\_path or private\_key\_contents must be supplied. | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | The Region that the AVI controller and SEs will be deployed to | `string` | n/a | yes |
 | <a name="input_register_controller"></a> [register\_controller](#input\_register\_controller) | If enabled is set to true the controller will be registered and licensed with Avi Cloud Services. The Long Organization ID (organization\_id) can be found from https://console.cloud.vmware.com/csp/gateway/portal/#/organization/info. The jwt\_token can be retrieved at https://portal.avipulse.vmware.com/portal/controller/auth/cspctrllogin | `object({ enabled = bool, jwt_token = string, email = string, organization_id = string })` | <pre>{<br>  "email": "",<br>  "enabled": "false",<br>  "jwt_token": "",<br>  "organization_id": ""<br>}</pre> | no |
 | <a name="input_se_ha_mode"></a> [se\_ha\_mode](#input\_se\_ha\_mode) | The HA mode of the default Service Engine Group. Possible values active/active, n+m, or active/standby | `string` | `"active/active"` | no |

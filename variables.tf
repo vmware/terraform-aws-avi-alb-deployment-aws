@@ -22,14 +22,14 @@ variable "key_pair_name" {
   type        = string
 }
 variable "private_key_path" {
-  description = "The local private key path for the EC2 Key pair used for authenticating to the Avi Controller"
+  description = "The local private key path for the EC2 Key pair used for authenticating to the Avi Controller. Either private_key_path or private_key_contents must be supplied."
   type        = string
   sensitive   = false
   default     = null
 
 }
 variable "private_key_contents" {
-  description = "The contents of the private key for the EC2 Key pair used for authenticating to the Avi Controller"
+  description = "The contents of the private key for the EC2 Key pair used for authenticating to the Avi Controller. Either private_key_path or private_key_contents must be supplied."
   type        = string
   sensitive   = true
   default     = null
