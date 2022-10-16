@@ -5,7 +5,7 @@
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": "kms:Decrypt",
-            "Resource": "arn:aws:kms:*:*:key/*"
+            "Resource": "arn:${awsPartition}:kms:*:*:key/*"
         }
     ]
 }
