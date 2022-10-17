@@ -23,6 +23,7 @@
       ${ indent(6, yamlencode(controller_names))}
     ansible_become: yes
     ansible_become_password: "{{ password }}"
+    aws_partition: ${aws_partition}
     aws_vpc_id: ${vpc_id}
     aws_region: ${aws_region}
     name_prefix: ${name_prefix}
@@ -73,6 +74,31 @@
     register_controller:
       enabled: ${register_controller.enabled}
 %{ endif ~}
+%{ if aws_partition == "aws-us-gov" ~}
+    motd: >
+      Attention!!
+
+      The use of this system is restricted to authorized users only. Unauthorized
+      access, use, or modification of this computer system or of the data contained
+      herein or in transit to/from this system constitutes a violation of Title 18,
+      United States Code, Section 1030 and state criminal and civil laws. 
+      
+
+      These systems and equipment are subject to monitoring to ensure proper performance
+      of applicable system and security features. Such monitoring may result in the
+      acquisition, recording and analysis of all data being communicated, transmitted,
+      processed, or stored in this system by a user, including personal information.
+
+
+      Evidence of unauthorized use collected during monitoring may be used for
+      administrative, criminal, or other adverse action. Unauthorized use may subject
+      you to criminal prosecution. Use of this computer system, authorized or
+      unauthorized, constitutes consent to monitoring of this system. 
+
+      
+      By accessing this information system, the user acknowledges and accepts the
+      aforementioned terms and conditions.
+%{ endif ~}
   tasks:
     - name: Wait for Controller to become ready
       uri:
@@ -110,6 +136,10 @@
           password_strength_check: true
           redirect_to_https: true
           use_uuid_from_input: false
+%{ if aws_partition == "aws-us-gov" ~}
+        linux_configuration:
+          banner: "{{ motd }}"
+%{ endif ~}
         welcome_workflow_complete: true
       until: sysconfig is not failed
       retries: 30
