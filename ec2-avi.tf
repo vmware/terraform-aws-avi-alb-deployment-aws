@@ -8,6 +8,7 @@ locals {
     create_firewall_rules           = var.create_firewall_rules
     se_mgmt_subnets                 = var.create_networking ? local.mgmt_subnets : local.custom_mgmt_subnets
     vpc_id                          = var.create_networking ? aws_vpc.avi[0].id : var.custom_vpc_id
+    aws_partition                   = data.aws_partition.current.partition
     aws_region                      = var.region
     avi_version                     = var.avi_version
     dns_servers                     = var.dns_servers
