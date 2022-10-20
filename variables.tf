@@ -152,22 +152,22 @@ variable "se_instance_type" {
   default     = "c5.large"
 }
 variable "se_s3_encryption" {
-  description = "Enable encryption on SE S3 Bucket"
+  description = "Enable encryption on SE S3 Bucket.  A new KMS key will be created if no key is provided with se_s3_encryption_key_arn"
   type        = bool
   default     = "false"
 }
 variable "se_ebs_encryption" {
-  description = "Enable encryption on SE S3 Bucket"
+  description = "Enable encryption on SE AMI / EBS Volumes.  A new KMS key will be created if no key is provided with se_ebs_encryption_key_arn"
   type        = bool
   default     = "false"
 }
 variable "se_s3_encryption_key_arn" {
-  description = "Encryption key for SE S3 Bucket (se_s3_encryption must be set to true)"
+  description = "AWS Resource Name of existing KMS key for SE S3 Bucket (se_s3_encryption must be set to true)"
   type        = string
   default     = null
 }
 variable "se_ebs_encryption_key_arn" {
-  description = "Encryption key for SE AMI/EBS (se_ebs_encryption must be set to true)"
+  description = "AWS Resource Name of existing KMS key for SE AMI/EBS (se_ebs_encryption must be set to true)"
   type        = string
   default     = null
 }
