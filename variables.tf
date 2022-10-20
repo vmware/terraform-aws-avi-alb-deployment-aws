@@ -162,12 +162,12 @@ variable "se_ebs_encryption" {
   default     = "false"
 }
 variable "se_s3_encryption_key_arn" {
-  description = "AWS Resource Name of existing KMS key for SE S3 Bucket (se_s3_encryption must be set to true)"
+  description = "AWS Resource Name of an existing KMS key for SE S3 Bucket (se_s3_encryption must be set to true)"
   type        = string
   default     = null
 }
 variable "se_ebs_encryption_key_arn" {
-  description = "AWS Resource Name of existing KMS key for SE AMI/EBS (se_ebs_encryption must be set to true)"
+  description = "AWS Resource Name of an existing KMS key for SE AMI/EBS (se_ebs_encryption must be set to true)"
   type        = string
   default     = null
 }

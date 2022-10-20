@@ -207,6 +207,10 @@ No modules.
 | [aws_iam_role_policy.avi_vmimport_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_instance.avi_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
 | [aws_internet_gateway.avi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
+| [aws_kms_alias.se_ebs_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
+| [aws_kms_alias.se_s3_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
+| [aws_kms_key.se_ebs_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
+| [aws_kms_key.se_s3_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
 | [aws_route.default_route](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
 | [aws_security_group.avi_controller_sg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.avi_data_sg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
@@ -267,12 +271,12 @@ No modules.
 | <a name="input_private_key_path"></a> [private\_key\_path](#input\_private\_key\_path) | The local private key path for the EC2 Key pair used for authenticating to the Avi Controller. Either private\_key\_path or private\_key\_contents must be supplied. | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | The Region that the AVI controller and SEs will be deployed to | `string` | n/a | yes |
 | <a name="input_register_controller"></a> [register\_controller](#input\_register\_controller) | If enabled is set to true the controller will be registered and licensed with Avi Cloud Services. The Long Organization ID (organization\_id) can be found from https://console.cloud.vmware.com/csp/gateway/portal/#/organization/info. The jwt\_token can be retrieved at https://portal.avipulse.vmware.com/portal/controller/auth/cspctrllogin | `object({ enabled = bool, jwt_token = string, email = string, organization_id = string })` | <pre>{<br>  "email": "",<br>  "enabled": "false",<br>  "jwt_token": "",<br>  "organization_id": ""<br>}</pre> | no |
+| <a name="input_se_ebs_encryption"></a> [se\_ebs\_encryption](#input\_se\_ebs\_encryption) | Enable encryption on SE AMI / EBS Volumes.  A new KMS key will be created if no key is provided with se\_ebs\_encryption\_key\_arn | `bool` | `"false"` | no |
+| <a name="input_se_ebs_encryption_key_arn"></a> [se\_ebs\_encryption\_key\_arn](#input\_se\_ebs\_encryption\_key\_arn) | AWS Resource Name of an existing KMS key for SE AMI/EBS (se\_ebs\_encryption must be set to true) | `string` | `null` | no |
 | <a name="input_se_ha_mode"></a> [se\_ha\_mode](#input\_se\_ha\_mode) | The HA mode of the default Service Engine Group. Possible values active/active, n+m, or active/standby | `string` | `"active/active"` | no |
 | <a name="input_se_instance_type"></a> [se\_instance\_type](#input\_se\_instance\_type) | The instance type of the default Service Engine Group. Possible values can be found at https://aws.amazon.com/ec2/instance-types/ | `string` | `"c5.large"` | no |
-| <a name="input_se_ebs_encryption"></a> [se\_ebs\_encryption](#input\_se\_ebs\_encryption) | Enable AMI EBS encryption for Service Engines | `bool` | `false` | no |
-| <a name="input_se_s3_encryption"></a> [se\_s3\_encryption](#input\_se\_s3\_encryption) | Enable S3 encryption for Service Engine S3 Bucket | `bool` | `false` | no |
-| <a name="input_se_ebs_encryption_key_arn"></a> [se\_ebs\_encryption\_key\_arn](#input\_se\_ebs\_encryption\_key\_arn) | AWS Resource Name of an existing KMS key for use with EBS Encryption. If not set then a KMS key will be created. Must set se_ebs_encryption to true. | `string` | `null` | no |
-| <a name="input_se_s3_encryption_key_arn"></a> [se\_s3\_encryption\_key\_arn](#input\_se\_s3\_encryption\_key\_arn) | AWS Resource Name of an existing KMS key for use with S3 Encryption. If not set then a KMS key will be created. Must set se_s3_encryption to true. | `string` | `null` | no |
+| <a name="input_se_s3_encryption"></a> [se\_s3\_encryption](#input\_se\_s3\_encryption) | Enable encryption on SE S3 Bucket.  A new KMS key will be created if no key is provided with se\_s3\_encryption\_key\_arn | `bool` | `"false"` | no |
+| <a name="input_se_s3_encryption_key_arn"></a> [se\_s3\_encryption\_key\_arn](#input\_se\_s3\_encryption\_key\_arn) | AWS Resource Name of an existing KMS key for SE S3 Bucket (se\_s3\_encryption must be set to true) | `string` | `null` | no |
 
 ## Outputs
 
