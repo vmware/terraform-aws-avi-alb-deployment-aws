@@ -29,6 +29,8 @@
     name_prefix: ${name_prefix}
     se_ha_mode: ${se_ha_mode}
     se_instance_type: ${se_instance_type}
+    se_ebs_encryption_key_arn : ${se_ebs_encryption_key_arn}
+    se_s3_encryption_key_arn : ${se_s3_encryption_key_arn}
 %{ if create_firewall_rules ~}
     mgmt_security_group: ${mgmt_security_group}
     data_security_group: ${data_security_group}
@@ -165,6 +167,16 @@
           asg_poll_interval: 60
           vpc_id: "{{ aws_vpc_id }}"
           route53_integration: "{{ configure_dns_route_53 }}"
+%{ if se_ebs_encryption_key_arn != null ~}
+          ebs_encryption:
+            master_key: "{{ se_ebs_encryption_key_arn }}"
+            mode: "AWS_ENCRYPTION_MODE_SSE_KMS"
+%{ endif ~}
+%{ if se_s3_encryption_key_arn != null ~}
+          s3_encryption:
+            master_key: "{{ se_s3_encryption_key_arn }}"
+            mode: "AWS_ENCRYPTION_MODE_SSE_KMS"
+%{ endif ~}
           zones: 
 %{ for zone, mgmt_subnet in se_mgmt_subnets ~}
             - availability_zone: "${zone}"
