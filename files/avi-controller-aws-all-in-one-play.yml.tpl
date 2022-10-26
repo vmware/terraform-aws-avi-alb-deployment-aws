@@ -51,12 +51,8 @@
           type: "${item.type}"
 %{ endfor ~}
     configure_dns_route_53: ${configure_dns_route_53}
-    configure_dns_profile: ${configure_dns_profile}
-%{ if configure_dns_profile ~}
-    dns_domain: "{{ dns_service_domain | default('${dns_service_domain}') }}"
-%{ else ~}
-    dns_domain: "{{ dns_service_domain | default(omit) }}"
-%{ endif ~}
+    configure_dns_profile: 
+      ${ indent(6, yamlencode(configure_dns_profile))}
     configure_dns_vs: ${configure_dns_vs}
 %{ if configure_dns_vs ~}
     dns_vs_settings: 
@@ -289,13 +285,14 @@
           avi_ipamdnsproviderprofile:
             avi_credentials: "{{ avi_credentials }}"
             state: present
-            name: Avi_DNS
-            type: IPAMDNS_TYPE_INTERNAL_DNS
-            internal_profile:
-              dns_service_domain:
-              - domain_name: "{{ dns_domain }}"
-                pass_through: true
-              ttl: 30
+            name: "{{ configure_dns_profile.type }}_DNS"
+            type: "IPAMDNS_TYPE_{{ configure_dns_profile.type}}_DNS"
+%{ if configure_dns_profile.type == "INTERNAL" ~}            
+            internal_profile: "{{ configure_dns_profile.internal_profile }}"
+%{ endif ~}
+%{ if configure_dns_profile.type == "AWS" ~}
+            aws_profile: "{{ configure_dns_profile.aws_profile }}"
+%{ endif ~}
           register: create_dns
 
         - name: Update Cloud Configuration with DNS profile 
@@ -306,9 +303,9 @@
             data:
               add:
                 dns_provider_ref: "{{ create_dns.obj.url }}"
-      when: configure_dns_profile == true
+      when: configure_dns_profile.enabled == true
       tags: dns_profile
-
+    
     - name: Configure GSLB SE Group and Account
       block:
         - name: Configure GSLB SE-Group

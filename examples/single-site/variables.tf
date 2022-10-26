@@ -48,9 +48,18 @@ variable "controller_public_address" {
   default     = true
 }
 variable "configure_dns_profile" {
-  description = "Configure Avi DNS Profile for DNS Record Creation for Virtual Services. If set to true the dns_service_domain variable must also be set"
-  type        = bool
-  default     = false
+  description = "Configure a DNS Profile for DNS Record Creation for Virtual Services. Supported types are AWS or INTERNAL"
+  type = object({
+    enabled          = bool,
+    type             = optional(string),
+    internal_profile = optional(object({ dns_service_domain = list(object({ domain_name = list(string), pass_through = bool })), ttl = number })),
+    aws_profile      = optional(object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string, usable_domains = list(string) }))
+  })
+  default = { enabled = false }
+  validation {
+    condition     = contains(["AWS", "INTERNAL"], var.configure_dns_profile.type)
+    error_message = "Supported DNS Profile types are 'AWS' or 'INTERNAL'"
+  }
 }
 variable "dns_service_domain" {
   description = "The DNS Domain that will be available for Virtual Services. Avi will be the Authorative Nameserver for this domain and NS records may need to be created pointing to the Avi Service Engine addresses. An example is demo.Avi.com"
