@@ -53,6 +53,7 @@ variable "configure_dns_profile" {
     enabled        = bool,
     type           = string,
     usable_domains = list(string)
+    aws_profile    = optional(object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string }))
   })
   default = { enabled = false, type = "AVI", usable_domains = [] }
   validation {

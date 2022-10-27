@@ -54,15 +54,9 @@
           addr: "${item.addr}"
           type: "${item.type}"
 %{ endfor ~}
-%{ if dns_profile_route_53_settings ==  { iam_assume_role = "", region = "", vpc_id = "", access_key_id = "", secret_access_key = "" } && configure_dns_profile.type == "AWS"  ~}
-    route53_integration: "true"
-%{ else ~}
-    route53_integration: "false"
-%{ endif ~}
+    route53_integration: ${configure_dns_route_53}
     configure_dns_profile: 
       ${ indent(6, yamlencode(configure_dns_profile))}
-    dns_profile_route_53_settings: 
-      ${ indent(6, yamlencode(dns_profile_route_53_settings))}
     configure_dns_vs: ${configure_dns_vs}
 %{ if configure_dns_vs ~}
     dns_vs_settings: 
@@ -314,7 +308,7 @@
             type: "IPAMDNS_TYPE_INTERNAL_DNS"          
             internal_profile:
               dns_service_domain: "{{ dns_service_domain }}"
-              ttl: "30"
+              ttl: "{{ configure_dns_profile.ttl | default('30') }}"
           register: create_dns_avi
           when: configure_dns_profile.type == "AVI"
         
@@ -335,13 +329,13 @@
             name: "AWS_R53_DNS"
             type: "IPAMDNS_TYPE_AWS_DNS"
             aws_profile:
-              iam_assume_role: "{{ dns_profile_route_53_settings.iam_assume_role }}"
-              access_key_id: "{{ dns_profile_route_53_settings.access_key_id }}"
-              secret_access_key: "{{ dns_profile_route_53_settings.aws_profile.secret_access_key }}"
-              region: "{{ dns_profile_route_53_settings.region }}"
-              vpc_id: "{{ dns_profile_route_53_settings.vpc_id }}"
+              iam_assume_role: "{{ configure_dns_profile.aws_profile.iam_assume_role }}"
+              access_key_id: "{{ configure_dns_profile.aws_profile.access_key_id }}"
+              secret_access_key: "{{ configure_dns_profile.aws_profile.aws_profile.secret_access_key }}"
+              region: "{{ configure_dns_profile.aws_profile.region }}"
+              vpc_id: "{{ configure_dns_profile.aws_profile.vpc_id }}"
               usable_domains: "{{ configure_dns_profile.usable_domains }}"
-              ttl: "30"
+              ttl: "{{ configure_dns_profile.ttl | default('30') }}"
           register: create_dns_aws
           when: configure_dns_profile.type == "AWS" and route53_integration == "false"
 

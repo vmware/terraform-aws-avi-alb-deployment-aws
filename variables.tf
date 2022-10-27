@@ -203,22 +203,24 @@ variable "configure_controller" {
   default     = "true"
 }
 variable "configure_dns_profile" {
-  description = "Configure a DNS Profile for DNS Record Creation for Virtual Services. Supported types are AWS or AVI. When set to AWS, Route 53 integration will be configured and the dns_profile_route_53_settings variable can be used when the AWS Account used is different than the Avi Controller"
+  description = "Configure a DNS Profile for DNS Record Creation for Virtual Services. Supported profiles for the type are AWS or AVI. The AWS DNS Profile is only needed when the AWS Account used for Route53 is different than the Avi Controller and the configure_dns_route_53 variable can be used otherwise"
   type = object({
     enabled        = bool,
     type           = string,
-    usable_domains = list(string)
+    usable_domains = list(string),
+    ttl            = optional(string),
+    aws_profile    = optional(object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string }))
   })
-  default = { enabled = false, type = "AVI", usable_domains = [] }
+  default = { enabled = false, type = "AVI", usable_domains = [], ttl = "30" }
   validation {
     condition     = contains(["AWS", "AVI"], var.configure_dns_profile.type)
     error_message = "Supported DNS Profile types are 'AWS' or 'AVI'"
   }
 }
-variable "dns_profile_route_53_settings" {
-  description = "Settings for the Route 53 DNS Profile. This is variable is only needed when the AWS Account used for R53 is different than the Avi Controller"
-  type        = object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string })
-  default     = { iam_assume_role = "", region = "", vpc_id = "", access_key_id = "", secret_access_key = "" }
+variable "configure_dns_route_53" {
+  description = "Configures Route53 DNS integration in the AWS Cloud configuration. The following variables must be set to false if enabled: configure_dns_profile, configure_dns_vs, configure_gslb"
+  type        = bool
+  default     = "false"
 }
 variable "configure_dns_vs" {
   description = "Create Avi DNS Virtual Service. The configure_dns_profile variable must also be set to true"
