@@ -205,12 +205,6 @@ No modules.
 | [aws_iam_role_policy.avi_vmimport_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_instance.avi_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
 | [aws_internet_gateway.avi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
-| [aws_kms_alias.controller_ebs_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
-| [aws_kms_alias.se_ebs_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
-| [aws_kms_alias.se_s3_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
-| [aws_kms_key.controller_ebs_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
-| [aws_kms_key.se_ebs_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
-| [aws_kms_key.se_s3_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
 | [aws_route.default_route](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
 | [aws_security_group.avi_controller_sg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.avi_data_sg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
@@ -221,6 +215,8 @@ No modules.
 | [null_resource.changepassword_provisioner](https://registry.terraform.io/providers/hashicorp/null/3.1.1/docs/resources/resource) | resource |
 | [aws_ami.avi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_availability_zones.azs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
+| [aws_kms_alias.ebs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_alias) | data source |
+| [aws_kms_alias.s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_alias) | data source |
 | [aws_partition.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
 | [aws_subnet.custom](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 
@@ -241,7 +237,7 @@ No modules.
 | <a name="input_configure_dns_vs"></a> [configure\_dns\_vs](#input\_configure\_dns\_vs) | Create Avi DNS Virtual Service. The configure\_dns\_profile variable must also be set to true | `bool` | `"false"` | no |
 | <a name="input_configure_gslb"></a> [configure\_gslb](#input\_configure\_gslb) | Configure GSLB. The gslb\_site\_name, gslb\_domains, and configure\_dns\_vs variables must also be set. Optionally the additional\_gslb\_sites variable can be used to add active GSLB sites | `bool` | `"false"` | no |
 | <a name="input_configure_gslb_additional_sites"></a> [configure\_gslb\_additional\_sites](#input\_configure\_gslb\_additional\_sites) | Configure additional GSLB Sites. The additional\_gslb\_sites, gslb\_site\_name, gslb\_domains, and configure\_dns\_vs variables must also be set | `bool` | `"false"` | no |
-| <a name="input_controller_ebs_encryption"></a> [controller\_ebs\_encryption](#input\_controller\_ebs\_encryption) | Enable encryption on the Controller EBS Root Volume.  A new KMS key will be created if no key is provided with the controller\_ebs\_encryption\_key\_arn variable | `bool` | `"false"` | no |
+| <a name="input_controller_ebs_encryption"></a> [controller\_ebs\_encryption](#input\_controller\_ebs\_encryption) | Enable encryption on the Controller EBS Root Volume.  The AWS Managed EBS KMS key will be used if no key is provided with the controller\_ebs\_encryption\_key\_arn variable | `bool` | `"true"` | no |
 | <a name="input_controller_ebs_encryption_key_arn"></a> [controller\_ebs\_encryption\_key\_arn](#input\_controller\_ebs\_encryption\_key\_arn) | AWS Resource Name of an existing KMS key for the Controller EBS (controller\_ebs\_encryption must be set to true) | `string` | `null` | no |
 | <a name="input_controller_ha"></a> [controller\_ha](#input\_controller\_ha) | If true a HA controller cluster is deployed and configured | `bool` | `"false"` | no |
 | <a name="input_controller_password"></a> [controller\_password](#input\_controller\_password) | The password that will be used authenticating with the AVI Controller. This password be a minimum of 8 characters and contain at least one each of uppercase, lowercase, numbers, and special characters | `string` | n/a | yes |
@@ -273,11 +269,11 @@ No modules.
 | <a name="input_private_key_path"></a> [private\_key\_path](#input\_private\_key\_path) | The local private key path for the EC2 Key pair used for authenticating to the Avi Controller. Either private\_key\_path or private\_key\_contents must be supplied. | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | The Region that the AVI controller and SEs will be deployed to | `string` | n/a | yes |
 | <a name="input_register_controller"></a> [register\_controller](#input\_register\_controller) | If enabled is set to true the controller will be registered and licensed with Avi Cloud Services. The Long Organization ID (organization\_id) can be found from https://console.cloud.vmware.com/csp/gateway/portal/#/organization/info. The jwt\_token can be retrieved at https://portal.avipulse.vmware.com/portal/controller/auth/cspctrllogin | `object({ enabled = bool, jwt_token = string, email = string, organization_id = string })` | <pre>{<br>  "email": "",<br>  "enabled": "false",<br>  "jwt_token": "",<br>  "organization_id": ""<br>}</pre> | no |
-| <a name="input_se_ebs_encryption"></a> [se\_ebs\_encryption](#input\_se\_ebs\_encryption) | Enable encryption on SE AMI / EBS Volumes.  A new KMS key will be created if no key is provided with se\_ebs\_encryption\_key\_arn | `bool` | `"false"` | no |
+| <a name="input_se_ebs_encryption"></a> [se\_ebs\_encryption](#input\_se\_ebs\_encryption) | Enable encryption on SE AMI / EBS Volumes.  The AWS Managed EBS KMS key will be used if no key is provided with se\_ebs\_encryption\_key\_arn variable | `bool` | `"true"` | no |
 | <a name="input_se_ebs_encryption_key_arn"></a> [se\_ebs\_encryption\_key\_arn](#input\_se\_ebs\_encryption\_key\_arn) | AWS Resource Name of an existing KMS key for SE AMI/EBS (se\_ebs\_encryption must be set to true) | `string` | `null` | no |
 | <a name="input_se_ha_mode"></a> [se\_ha\_mode](#input\_se\_ha\_mode) | The HA mode of the default Service Engine Group. Possible values active/active, n+m, or active/standby | `string` | `"active/active"` | no |
 | <a name="input_se_instance_type"></a> [se\_instance\_type](#input\_se\_instance\_type) | The instance type of the default Service Engine Group. Possible values can be found at https://aws.amazon.com/ec2/instance-types/ | `string` | `"c5.large"` | no |
-| <a name="input_se_s3_encryption"></a> [se\_s3\_encryption](#input\_se\_s3\_encryption) | Enable encryption on SE S3 Bucket.  A new KMS key will be created if no key is provided with se\_s3\_encryption\_key\_arn | `bool` | `"false"` | no |
+| <a name="input_se_s3_encryption"></a> [se\_s3\_encryption](#input\_se\_s3\_encryption) | Enable encryption on SE S3 Bucket.  The AWS Managed S3 KMS key will be used if no key is provided with se\_s3\_encryption\_key\_arn variable | `bool` | `"true"` | no |
 | <a name="input_se_s3_encryption_key_arn"></a> [se\_s3\_encryption\_key\_arn](#input\_se\_s3\_encryption\_key\_arn) | AWS Resource Name of an existing KMS key for SE S3 Bucket (se\_s3\_encryption must be set to true) | `string` | `null` | no |
 
 ## Outputs

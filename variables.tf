@@ -152,19 +152,19 @@ variable "se_instance_type" {
   default     = "c5.large"
 }
 variable "controller_ebs_encryption" {
-  description = "Enable encryption on the Controller EBS Root Volume.  A new KMS key will be created if no key is provided with the controller_ebs_encryption_key_arn variable"
+  description = "Enable encryption on the Controller EBS Root Volume.  The AWS Managed EBS KMS key will be used if no key is provided with the controller_ebs_encryption_key_arn variable"
   type        = bool
-  default     = "false"
+  default     = "true"
 }
 variable "se_s3_encryption" {
-  description = "Enable encryption on SE S3 Bucket.  A new KMS key will be created if no key is provided with se_s3_encryption_key_arn"
+  description = "Enable encryption on SE S3 Bucket.  The AWS Managed S3 KMS key will be used if no key is provided with se_s3_encryption_key_arn variable"
   type        = bool
-  default     = "false"
+  default     = "true"
 }
 variable "se_ebs_encryption" {
-  description = "Enable encryption on SE AMI / EBS Volumes.  A new KMS key will be created if no key is provided with se_ebs_encryption_key_arn"
+  description = "Enable encryption on SE AMI / EBS Volumes.  The AWS Managed EBS KMS key will be used if no key is provided with se_ebs_encryption_key_arn variable"
   type        = bool
-  default     = "false"
+  default     = "true"
 }
 variable "controller_ebs_encryption_key_arn" {
   description = "AWS Resource Name of an existing KMS key for the Controller EBS (controller_ebs_encryption must be set to true)"

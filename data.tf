@@ -17,4 +17,12 @@ data "aws_ami" "avi" {
     values = ["Avi*Controller-${var.avi_version}-*"]
   }
 }
+data "aws_kms_alias" "s3" {
+  count = var.se_s3_encryption ? 1 : 0
+  name  = "alias/aws/s3"
+}
+data "aws_kms_alias" "ebs" {
+  count = var.controller_ebs_encryption || var.se_ebs_encryption ? 1 : 0
+  name  = "alias/aws/ebs"
+}
 data "aws_partition" "current" {}

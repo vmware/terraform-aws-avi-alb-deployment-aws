@@ -36,16 +36,13 @@ locals {
     gslb_se_instance_type           = var.gslb_se_instance_type
     se_ha_mode                      = var.se_ha_mode
     se_instance_type                = var.se_instance_type
-    se_ebs_encryption_key_arn       = local.se_ebs_encryption_key_arn
-    se_s3_encryption_key_arn        = local.se_s3_encryption_key_arn
+    se_ebs_encryption_key_arn       = var.se_ebs_encryption ? var.se_ebs_encryption_key_arn == null ? data.aws_kms_alias.ebs[0].target_key_arn : var.se_ebs_encryption_key_arn : null
+    se_s3_encryption_key_arn        = var.se_ebs_encryption ? var.se_s3_encryption_key_arn == null ? data.aws_kms_alias.s3[0].target_key_arn : var.se_s3_encryption_key_arn : null
     avi_upgrade                     = var.avi_upgrade
   }
   controller_names = aws_instance.avi_controller[*].tags.Name
   controller_ip    = aws_instance.avi_controller[*].private_ip
   private_key      = var.private_key_path != null ? file(var.private_key_path) : var.private_key_contents
-
-  se_ebs_encryption_key_arn = ((var.se_ebs_encryption == false) ? null : (var.se_ebs_encryption_key_arn == null ? aws_kms_key.se_ebs_key[0].arn : var.se_ebs_encryption_key_arn))
-  se_s3_encryption_key_arn  = ((var.se_s3_encryption == false) ? null : (var.se_s3_encryption_key_arn == null ? aws_kms_key.se_s3_key[0].arn : var.se_s3_encryption_key_arn))
 
   mgmt_subnets = { for subnet in aws_subnet.avi : subnet.availability_zone =>
     {
@@ -69,7 +66,7 @@ resource "aws_instance" "avi_controller" {
     volume_size           = var.boot_disk_size
     delete_on_termination = true
     encrypted             = var.controller_ebs_encryption
-    kms_key_id            = var.controller_ebs_encryption ? var.controller_ebs_encryption_key_arn == null ? aws_kms_key.controller_ebs_key[0].arn : var.controller_ebs_encryption_key_arn : null
+    kms_key_id            = var.controller_ebs_encryption ? var.controller_ebs_encryption_key_arn == null ? data.aws_kms_alias.ebs[0].target_key_arn : var.controller_ebs_encryption_key_arn : null
   }
   instance_type               = var.instance_type
   key_name                    = var.key_pair_name
