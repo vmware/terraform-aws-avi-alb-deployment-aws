@@ -25,7 +25,6 @@ module "avi_controller_aws" {
   controller_ha             = var.controller_ha
   controller_public_address = var.controller_public_address
   configure_dns_profile     = var.configure_dns_profile
-  dns_service_domain        = var.dns_service_domain
   configure_dns_vs          = var.configure_dns_vs
   dns_vs_settings           = var.dns_vs_settings
 }

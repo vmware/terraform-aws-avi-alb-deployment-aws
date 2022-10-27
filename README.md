@@ -14,7 +14,7 @@ During the creation of the Controller instance the following initialization step
 * Run Ansible playbook to configure initial settings and AWS Full Access Cloud
 
 The Ansible playbook can optionally add these configurations:
-* Create Avi DNS Profile (configured with configure_dns_profile and dns_service_domain variables)
+* Create Avi DNS Profile (configured with configure_dns_profile variable)
 * Create Avi DNS Virtual Service (configured with configure_dns_vs and dns_vs_settings variables)
 * Configure GSLB (configured with configure_gslb, gslb_site_name, gslb_domains, and configure_gslb_additional_sites variables)
 
@@ -71,8 +71,7 @@ module "avi_controller_aws_west2" {
   name_prefix           = "<name>"
   custom_tags           = { "Role" : "Avi-Controller", "Owner" : "admin", "Department" : "IT" }
   se_ha_mode            = "active/active"
-  configure_dns_profile = "true"
-  dns_service_domain    = "west1.avidemo.net"
+  configure_dns_profile = { enabled = "true", type = "AVI", usable_domains = ["west1.avidemo.net"] }
   configure_dns_vs      = "true"
   dns_vs_settings       = { allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
   create_gslb_se_group  = "true"
@@ -96,8 +95,7 @@ module "avi_controller_aws_east1" {
   name_prefix                     = "<name>"
   custom_tags                     = { "Role" : "Avi-Controller", "Owner" : "admin", "Department" : "IT", "shutdown_policy" : "noshut" }
   se_ha_mode                      = "active/active"
-  configure_dns_profile           = "true"
-  dns_service_domain              = "east1.avidemo.net"
+  configure_dns_profile           = { enabled = "true", type = "AVI", usable_domains = ["east1.avidemo.net"] }
   configure_dns_vs                = "true"
   dns_vs_settings                 = { allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
   configure_gslb                  = "true"
@@ -170,7 +168,7 @@ The terraform-aws-avi-alb-deployment-aws project team welcomes contributions fro
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.2.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.22.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | 3.1.1 |
 
@@ -236,8 +234,8 @@ No modules.
 | <a name="input_aws_secret_key"></a> [aws\_secret\_key](#input\_aws\_secret\_key) | The Secret Key that will be used to deploy AWS resources | `string` | `""` | no |
 | <a name="input_boot_disk_size"></a> [boot\_disk\_size](#input\_boot\_disk\_size) | The boot disk size for the Avi controller | `number` | `128` | no |
 | <a name="input_configure_controller"></a> [configure\_controller](#input\_configure\_controller) | Configure the Avi Cloud via Ansible after controller deployment. If not set to true this must be done manually with the desired config | `bool` | `"true"` | no |
-| <a name="input_configure_dns_profile"></a> [configure\_dns\_profile](#input\_configure\_dns\_profile) | Configure Avi DNS Profile for DNS Record Creation for Virtual Services. If set to true the dns\_service\_domain variable must also be set | `bool` | `"false"` | no |
-| <a name="input_configure_dns_route_53"></a> [configure\_dns\_route\_53](#input\_configure\_dns\_route\_53) | Configures Avi Cloud with Route53 DNS Provider. The following variables must be set to false if enabled: configure\_dns\_profile, configure\_dns\_vs, configure\_gslb | `bool` | `"false"` | no |
+| <a name="input_configure_dns_profile"></a> [configure\_dns\_profile](#input\_configure\_dns\_profile) | Configure a DNS Profile for DNS Record Creation for Virtual Services. Supported profiles for the type are AWS or AVI. The AWS DNS Profile is only needed when the AWS Account used for Route53 is different than the Avi Controller and the configure\_dns\_route\_53 variable can be used otherwise | <pre>object({<br>    enabled        = bool,<br>    type           = string,<br>    usable_domains = list(string),<br>    ttl            = optional(string),<br>    aws_profile    = optional(object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string }))<br>  })</pre> | <pre>{<br>  "enabled": false,<br>  "ttl": "30",<br>  "type": "AVI",<br>  "usable_domains": []<br>}</pre> | no |
+| <a name="input_configure_dns_route_53"></a> [configure\_dns\_route\_53](#input\_configure\_dns\_route\_53) | Configures Route53 DNS integration in the AWS Cloud configuration. The following variables must be set to false if enabled: configure\_dns\_profile, configure\_dns\_vs, configure\_gslb | `bool` | `"false"` | no |
 | <a name="input_configure_dns_vs"></a> [configure\_dns\_vs](#input\_configure\_dns\_vs) | Create Avi DNS Virtual Service. The configure\_dns\_profile variable must also be set to true | `bool` | `"false"` | no |
 | <a name="input_configure_gslb"></a> [configure\_gslb](#input\_configure\_gslb) | Configure GSLB. The gslb\_site\_name, gslb\_domains, and configure\_dns\_vs variables must also be set. Optionally the additional\_gslb\_sites variable can be used to add active GSLB sites | `bool` | `"false"` | no |
 | <a name="input_configure_gslb_additional_sites"></a> [configure\_gslb\_additional\_sites](#input\_configure\_gslb\_additional\_sites) | Configure additional GSLB Sites. The additional\_gslb\_sites, gslb\_site\_name, gslb\_domains, and configure\_dns\_vs variables must also be set | `bool` | `"false"` | no |

@@ -203,12 +203,22 @@ variable "configure_controller" {
   default     = "true"
 }
 variable "configure_dns_profile" {
-  description = "Configure Avi DNS Profile for DNS Record Creation for Virtual Services. If set to true the dns_service_domain variable must also be set"
-  type        = bool
-  default     = "false"
+  description = "Configure a DNS Profile for DNS Record Creation for Virtual Services. Supported profiles for the type are AWS or AVI. The AWS DNS Profile is only needed when the AWS Account used for Route53 is different than the Avi Controller and the configure_dns_route_53 variable can be used otherwise"
+  type = object({
+    enabled        = bool,
+    type           = string,
+    usable_domains = list(string),
+    ttl            = optional(string),
+    aws_profile    = optional(object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string }))
+  })
+  default = { enabled = false, type = "AVI", usable_domains = [], ttl = "30" }
+  validation {
+    condition     = contains(["AWS", "AVI"], var.configure_dns_profile.type)
+    error_message = "Supported DNS Profile types are 'AWS' or 'AVI'"
+  }
 }
 variable "configure_dns_route_53" {
-  description = "Configures Avi Cloud with Route53 DNS Provider. The following variables must be set to false if enabled: configure_dns_profile, configure_dns_vs, configure_gslb"
+  description = "Configures Route53 DNS integration in the AWS Cloud configuration. The following variables must be set to false if enabled: configure_dns_profile, configure_dns_vs, configure_gslb"
   type        = bool
   default     = "false"
 }

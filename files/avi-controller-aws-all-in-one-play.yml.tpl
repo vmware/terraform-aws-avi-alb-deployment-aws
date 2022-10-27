@@ -29,8 +29,12 @@
     name_prefix: ${name_prefix}
     se_ha_mode: ${se_ha_mode}
     se_instance_type: ${se_instance_type}
+%{ if se_ebs_encryption_key_arn != null ~}
     se_ebs_encryption_key_arn : ${se_ebs_encryption_key_arn}
+%{ endif ~}
+%{ if se_s3_encryption_key_arn != null ~}
     se_s3_encryption_key_arn : ${se_s3_encryption_key_arn}
+%{ endif ~}
 %{ if create_firewall_rules ~}
     mgmt_security_group: ${mgmt_security_group}
     data_security_group: ${data_security_group}
@@ -50,13 +54,9 @@
           addr: "${item.addr}"
           type: "${item.type}"
 %{ endfor ~}
-    configure_dns_route_53: ${configure_dns_route_53}
-    configure_dns_profile: ${configure_dns_profile}
-%{ if configure_dns_profile ~}
-    dns_domain: "{{ dns_service_domain | default('${dns_service_domain}') }}"
-%{ else ~}
-    dns_domain: "{{ dns_service_domain | default(omit) }}"
-%{ endif ~}
+    route53_integration: ${configure_dns_route_53}
+    configure_dns_profile: 
+      ${ indent(6, yamlencode(configure_dns_profile))}
     configure_dns_vs: ${configure_dns_vs}
 %{ if configure_dns_vs ~}
     dns_vs_settings: 
@@ -166,7 +166,7 @@
           region: "{{ aws_region }}"
           asg_poll_interval: 60
           vpc_id: "{{ aws_vpc_id }}"
-          route53_integration: "{{ configure_dns_route_53 }}"
+          route53_integration: "{{ route53_integration }}"
 %{ if se_ebs_encryption_key_arn != null ~}
           ebs_encryption:
             master_key: "{{ se_ebs_encryption_key_arn }}"
@@ -285,18 +285,59 @@
 %{ endif ~}
     - name: Configure DNS Profile
       block:
+        - name: Create Empty List for dns_service_domain API field
+          set_fact:
+            dns_service_domain: []
+          when: configure_dns_profile.type == "AVI"
+          
+
+        - name: Build list for dns_service_domain API field
+          set_fact:
+            dns_service_domain: "{{ dns_service_domain | default([]) + [{'domain_name': domain, 'pass_through': 'true' }] }}"
+          loop: "{{ configure_dns_profile.usable_domains }}"
+          loop_control:
+            loop_var: domain
+          when: configure_dns_profile.type == "AVI"
+          
+
         - name: Create Avi DNS Profile
           avi_ipamdnsproviderprofile:
             avi_credentials: "{{ avi_credentials }}"
             state: present
-            name: Avi_DNS
-            type: IPAMDNS_TYPE_INTERNAL_DNS
+            name: "Avi_DNS"
+            type: "IPAMDNS_TYPE_INTERNAL_DNS"          
             internal_profile:
-              dns_service_domain:
-              - domain_name: "{{ dns_domain }}"
-                pass_through: true
-              ttl: 30
-          register: create_dns
+              dns_service_domain: "{{ dns_service_domain }}"
+              ttl: "{{ configure_dns_profile.ttl | default('30') }}"
+          register: create_dns_avi
+          when: configure_dns_profile.type == "AVI"
+        
+        - name: Update Cloud Configuration with DNS profile 
+          avi_api_session:
+            avi_credentials: "{{ avi_credentials }}"
+            http_method: patch
+            path: "cloud/{{ avi_cloud.obj.uuid }}"
+            data:
+              add:
+                dns_provider_ref: "{{ create_dns_avi.obj.url }}"
+          when: configure_dns_profile.type == "AVI"
+
+        - name: Create AWS Route53 DNS Profile
+          avi_ipamdnsproviderprofile:
+            avi_credentials: "{{ avi_credentials }}"
+            state: present
+            name: "AWS_R53_DNS"
+            type: "IPAMDNS_TYPE_AWS_DNS"
+            aws_profile:
+              iam_assume_role: "{{ configure_dns_profile.aws_profile.iam_assume_role }}"
+              access_key_id: "{{ configure_dns_profile.aws_profile.access_key_id }}"
+              secret_access_key: "{{ configure_dns_profile.aws_profile.aws_profile.secret_access_key }}"
+              region: "{{ configure_dns_profile.aws_profile.region }}"
+              vpc_id: "{{ configure_dns_profile.aws_profile.vpc_id }}"
+              usable_domains: "{{ configure_dns_profile.usable_domains }}"
+              ttl: "{{ configure_dns_profile.ttl | default('30') }}"
+          register: create_dns_aws
+          when: configure_dns_profile.type == "AWS" and route53_integration == "false"
 
         - name: Update Cloud Configuration with DNS profile 
           avi_api_session:
@@ -305,10 +346,11 @@
             path: "cloud/{{ avi_cloud.obj.uuid }}"
             data:
               add:
-                dns_provider_ref: "{{ create_dns.obj.url }}"
-      when: configure_dns_profile == true
+                dns_provider_ref: "{{ create_dns_aws.obj.url }}"
+          when: configure_dns_profile.type == "AWS" and route53_integration == "false"
+      when: configure_dns_profile.enabled == true
       tags: dns_profile
-
+    
     - name: Configure GSLB SE Group and Account
       block:
         - name: Configure GSLB SE-Group
@@ -392,7 +434,7 @@
               dns_info:
               - type: DNS_RECORD_A
                 algorithm: DNS_RECORD_RESPONSE_CONSISTENT_HASH
-                fqdn: "dns.{{ dns_domain }}"
+                fqdn: "dns.{{ configure_dns_profile.usable_domains.0 }}"
               name: vsvip-DNS-VS-Default-Cloud
           register: vsvip_results
           until: vsvip_results is not failed
