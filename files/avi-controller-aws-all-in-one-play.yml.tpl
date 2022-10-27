@@ -331,13 +331,13 @@
             aws_profile:
               iam_assume_role: "{{ configure_dns_profile.aws_profile.iam_assume_role }}"
               access_key_id: "{{ configure_dns_profile.aws_profile.access_key_id }}"
-              secret_access_key: "{{ configure_dns_profile.aws_profile.aws_profile.secret_access_key }}"
+              secret_access_key: "{{ configure_dns_profile.aws_profile.secret_access_key }}"
               region: "{{ configure_dns_profile.aws_profile.region }}"
               vpc_id: "{{ configure_dns_profile.aws_profile.vpc_id }}"
               usable_domains: "{{ configure_dns_profile.usable_domains }}"
               ttl: "{{ configure_dns_profile.ttl | default('30') }}"
           register: create_dns_aws
-          when: configure_dns_profile.type == "AWS" and route53_integration == "false"
+          when: configure_dns_profile.type == "AWS" and route53_integration == false
 
         - name: Update Cloud Configuration with DNS profile 
           avi_api_session:
@@ -347,7 +347,7 @@
             data:
               add:
                 dns_provider_ref: "{{ create_dns_aws.obj.url }}"
-          when: configure_dns_profile.type == "AWS" and route53_integration == "false"
+          when: configure_dns_profile.type == "AWS" and route53_integration == false
       when: configure_dns_profile.enabled == true
       tags: dns_profile
     

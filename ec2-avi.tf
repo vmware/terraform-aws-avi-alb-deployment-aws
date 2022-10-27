@@ -68,6 +68,8 @@ resource "aws_instance" "avi_controller" {
   root_block_device {
     volume_size           = var.boot_disk_size
     delete_on_termination = true
+    encrypted             = var.controller_ebs_encryption
+    kms_key_id            = var.controller_ebs_encryption ? var.controller_ebs_encryption_key_arn == null ? aws_kms_key.controller_ebs_key[0].arn : var.controller_ebs_encryption_key_arn : null
   }
   instance_type               = var.instance_type
   key_name                    = var.key_pair_name
