@@ -203,23 +203,22 @@ variable "configure_controller" {
   default     = "true"
 }
 variable "configure_dns_profile" {
-  description = "Configure a DNS Profile for DNS Record Creation for Virtual Services. Supported types are AWS or INTERNAL"
+  description = "Configure a DNS Profile for DNS Record Creation for Virtual Services. Supported types are AWS or AVI. When set to AWS, Route 53 integration will be configured and the dns_profile_route_53_settings variable can be used when the AWS Account used is different than the Avi Controller"
   type = object({
-    enabled          = bool,
-    type             = optional(string),
-    internal_profile = optional(object({ dns_service_domain = list(object({ domain_name = list(string), pass_through = bool })), ttl = number })),
-    aws_profile      = optional(object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string, usable_domains = list(string) }))
+    enabled        = bool,
+    type           = string,
+    usable_domains = list(string)
   })
-  default = { enabled = false }
+  default = { enabled = false, type = "AVI", usable_domains = [] }
   validation {
-    condition     = contains(["AWS", "INTERNAL"], var.configure_dns_profile.type)
-    error_message = "Supported DNS Profile types are 'AWS' or 'INTERNAL'"
+    condition     = contains(["AWS", "AVI"], var.configure_dns_profile.type)
+    error_message = "Supported DNS Profile types are 'AWS' or 'AVI'"
   }
 }
-variable "configure_dns_route_53" {
-  description = "Configures Avi Cloud with Route53 DNS Provider. The following variables must be set to false if enabled: configure_dns_profile, configure_dns_vs, configure_gslb"
-  type        = bool
-  default     = "false"
+variable "dns_profile_route_53_settings" {
+  description = "Settings for the Route 53 DNS Profile. This is variable is only needed when the AWS Account used for R53 is different than the Avi Controller"
+  type        = object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string })
+  default     = { iam_assume_role = "", region = "", vpc_id = "", access_key_id = "", secret_access_key = "" }
 }
 variable "configure_dns_vs" {
   description = "Create Avi DNS Virtual Service. The configure_dns_profile variable must also be set to true"

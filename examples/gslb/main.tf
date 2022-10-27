@@ -25,8 +25,7 @@ module "avi_controller_aws_west2" {
   key_pair_name             = var.key_pair_name
   private_key_path          = var.private_key_path
   name_prefix               = var.name_prefix_west
-  configure_dns_profile     = "true"
-  dns_service_domain        = "west1.avidemo.net"
+  configure_dns_profile     = { enabled = "true", type = "AVI", usable_domains = ["west1.avidemo.net"] }
   configure_dns_vs          = "true"
   dns_vs_settings           = var.dns_vs_settings_west
 }
@@ -48,8 +47,7 @@ module "avi_controller_aws_east2" {
   key_pair_name                   = var.key_pair_name
   private_key_path                = var.private_key_path
   name_prefix                     = var.name_prefix_east
-  configure_dns_profile           = "true"
-  dns_service_domain              = "east2.avidemo.net"
+  configure_dns_profile           = { enabled = "true", type = "AVI", usable_domains = ["east2.avidemo.net"] }
   configure_dns_vs                = "true"
   dns_vs_settings                 = var.dns_vs_settings_east
   configure_gslb                  = "true"

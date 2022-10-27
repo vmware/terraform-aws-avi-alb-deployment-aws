@@ -14,7 +14,7 @@ During the creation of the Controller instance the following initialization step
 * Run Ansible playbook to configure initial settings and AWS Full Access Cloud
 
 The Ansible playbook can optionally add these configurations:
-* Create Avi DNS Profile (configured with configure_dns_profile and dns_service_domain variables)
+* Create Avi DNS Profile (configured with configure_dns_profile variable)
 * Create Avi DNS Virtual Service (configured with configure_dns_vs and dns_vs_settings variables)
 * Configure GSLB (configured with configure_gslb, gslb_site_name, gslb_domains, and configure_gslb_additional_sites variables)
 
@@ -71,8 +71,7 @@ module "avi_controller_aws_west2" {
   name_prefix           = "<name>"
   custom_tags           = { "Role" : "Avi-Controller", "Owner" : "admin", "Department" : "IT" }
   se_ha_mode            = "active/active"
-  configure_dns_profile = "true"
-  dns_service_domain    = "west1.avidemo.net"
+  configure_dns_profile = { enabled = "true", type = "AVI", usable_domains = ["west1.avidemo.net"] }
   configure_dns_vs      = "true"
   dns_vs_settings       = { allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
   create_gslb_se_group  = "true"
@@ -96,8 +95,7 @@ module "avi_controller_aws_east1" {
   name_prefix                     = "<name>"
   custom_tags                     = { "Role" : "Avi-Controller", "Owner" : "admin", "Department" : "IT", "shutdown_policy" : "noshut" }
   se_ha_mode                      = "active/active"
-  configure_dns_profile           = "true"
-  dns_service_domain              = "east1.avidemo.net"
+  configure_dns_profile           = { enabled = "true", type = "AVI", usable_domains = ["east1.avidemo.net"] }
   configure_dns_vs                = "true"
   dns_vs_settings                 = { allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
   configure_gslb                  = "true"
@@ -236,8 +234,7 @@ No modules.
 | <a name="input_aws_secret_key"></a> [aws\_secret\_key](#input\_aws\_secret\_key) | The Secret Key that will be used to deploy AWS resources | `string` | `""` | no |
 | <a name="input_boot_disk_size"></a> [boot\_disk\_size](#input\_boot\_disk\_size) | The boot disk size for the Avi controller | `number` | `128` | no |
 | <a name="input_configure_controller"></a> [configure\_controller](#input\_configure\_controller) | Configure the Avi Cloud via Ansible after controller deployment. If not set to true this must be done manually with the desired config | `bool` | `"true"` | no |
-| <a name="input_configure_dns_profile"></a> [configure\_dns\_profile](#input\_configure\_dns\_profile) | Configure a DNS Profile for DNS Record Creation for Virtual Services. Supported types are AWS or INTERNAL | <pre>object({<br>    enabled          = bool,<br>    type             = optional(string),<br>    internal_profile = optional(object({ dns_service_domain = list(object({ domain_name = list(string), pass_through = bool })), ttl = number })),<br>    aws_profile      = optional(object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string, usable_domains = list(string) }))<br>  })</pre> | <pre>{<br>  "enabled": false<br>}</pre> | no |
-| <a name="input_configure_dns_route_53"></a> [configure\_dns\_route\_53](#input\_configure\_dns\_route\_53) | Configures Avi Cloud with Route53 DNS Provider. The following variables must be set to false if enabled: configure\_dns\_profile, configure\_dns\_vs, configure\_gslb | `bool` | `"false"` | no |
+| <a name="input_configure_dns_profile"></a> [configure\_dns\_profile](#input\_configure\_dns\_profile) | Configure a DNS Profile for DNS Record Creation for Virtual Services. Supported types are AWS or AVI. When set to AWS, Route 53 integration will be configured and the dns\_profile\_route\_53\_settings variable can be used when the AWS Account used is different than the Avi Controller | <pre>object({<br>    enabled        = bool,<br>    type           = string,<br>    usable_domains = list(string)<br>  })</pre> | <pre>{<br>  "enabled": false,<br>  "type": "AVI",<br>  "usable_domains": []<br>}</pre> | no |
 | <a name="input_configure_dns_vs"></a> [configure\_dns\_vs](#input\_configure\_dns\_vs) | Create Avi DNS Virtual Service. The configure\_dns\_profile variable must also be set to true | `bool` | `"false"` | no |
 | <a name="input_configure_gslb"></a> [configure\_gslb](#input\_configure\_gslb) | Configure GSLB. The gslb\_site\_name, gslb\_domains, and configure\_dns\_vs variables must also be set. Optionally the additional\_gslb\_sites variable can be used to add active GSLB sites | `bool` | `"false"` | no |
 | <a name="input_configure_gslb_additional_sites"></a> [configure\_gslb\_additional\_sites](#input\_configure\_gslb\_additional\_sites) | Configure additional GSLB Sites. The additional\_gslb\_sites, gslb\_site\_name, gslb\_domains, and configure\_dns\_vs variables must also be set | `bool` | `"false"` | no |
@@ -252,6 +249,7 @@ No modules.
 | <a name="input_custom_subnet_ids"></a> [custom\_subnet\_ids](#input\_custom\_subnet\_ids) | This field can be used to specify a list of existing VPC Subnets for the controller and SEs. The create-networking variable must also be set to false for this network to be used. | `list(string)` | `null` | no |
 | <a name="input_custom_tags"></a> [custom\_tags](#input\_custom\_tags) | Custom tags added to AWS Resources created by the module | `map(string)` | `{}` | no |
 | <a name="input_custom_vpc_id"></a> [custom\_vpc\_id](#input\_custom\_vpc\_id) | This field can be used to specify an existing VPC for the controller and SEs. The create-networking variable must also be set to false for this network to be used. | `string` | `null` | no |
+| <a name="input_dns_profile_route_53_settings"></a> [dns\_profile\_route\_53\_settings](#input\_dns\_profile\_route\_53\_settings) | Settings for the Route 53 DNS Profile. This is variable is only needed when the AWS Account used for R53 is different than the Avi Controller | `object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string })` | <pre>{<br>  "access_key_id": "",<br>  "iam_assume_role": "",<br>  "region": "",<br>  "secret_access_key": "",<br>  "vpc_id": ""<br>}</pre> | no |
 | <a name="input_dns_search_domain"></a> [dns\_search\_domain](#input\_dns\_search\_domain) | The optional DNS search domain that will be used by the controller | `string` | `null` | no |
 | <a name="input_dns_servers"></a> [dns\_servers](#input\_dns\_servers) | The optional DNS servers that will be used for local DNS resolution by the controller. Example ["8.8.4.4", "8.8.8.8"] | `list(string)` | `null` | no |
 | <a name="input_dns_service_domain"></a> [dns\_service\_domain](#input\_dns\_service\_domain) | The DNS Domain that will be available for Virtual Services. Avi will be the Authorative Nameserver for this domain and NS records may need to be created pointing to the Avi Service Engine addresses. An example is demo.Avi.com | `string` | `""` | no |
