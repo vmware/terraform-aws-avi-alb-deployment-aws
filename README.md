@@ -14,9 +14,9 @@ During the creation of the Controller instance the following initialization step
 * Run Ansible playbook to configure initial settings and AWS Full Access Cloud
 
 The Ansible playbook can optionally add these configurations:
-* Create Avi DNS Profile (configured with configure_dns_profile variable)
-* Create Avi DNS Virtual Service (configured with configure_dns_vs variable)
-* Configure GSLB (configured with configure_gslb, gslb_site_name, gslb_domains, and configure_gslb_additional_sites variables)
+* Create Avi DNS Profile (configured with the configure_dns_profile variable)
+* Create Avi DNS Virtual Service (configured with the configure_dns_vs variable)
+* Configure GSLB (configured with the configure_gslb, create_gslb_se_group, and gslb_se_instance_type variables)
 
 ## Usage
 This is an example of a controller deployment that leverages an existing VPC (with a cidr_block of 10.154.0.0/16) and 3 subnets. The public key is already created in EC2 and the private key found in the "/home/user/.ssh/id_rsa" will be used to copy and run the Ansible playbook to configure the Controller.
@@ -245,7 +245,7 @@ No modules.
 | <a name="input_controller_password"></a> [controller\_password](#input\_controller\_password) | The password that will be used authenticating with the AVI Controller. This password be a minimum of 8 characters and contain at least one each of uppercase, lowercase, numbers, and special characters | `string` | n/a | yes |
 | <a name="input_controller_public_address"></a> [controller\_public\_address](#input\_controller\_public\_address) | This variable controls if the Controller has a Public IP Address. When set to false the Ansible provisioner will connect to the private IP of the Controller. | `bool` | `"false"` | no |
 | <a name="input_create_firewall_rules"></a> [create\_firewall\_rules](#input\_create\_firewall\_rules) | This variable controls the Security Group creation for the Avi deployment. When set to false the necessary security group rules must be in place before the deployment and set with the firewall\_custom\_security\_group\_ids variable | `bool` | `"true"` | no |
-| <a name="input_create_gslb_se_group"></a> [create\_gslb\_se\_group](#input\_create\_gslb\_se\_group) | Create a SE group for GSLB. The gslb\_site\_name variable must also be configured. This variable should be set to true for the follower GSLB sites. When configure\_gslb is set to true a SE group will be created automatically | `bool` | `"false"` | no |
+| <a name="input_create_gslb_se_group"></a> [create\_gslb\_se\_group](#input\_create\_gslb\_se\_group) | Create a SE group for GSLB. The site\_name parameter of the configure\_gslb variable must also be configured. This variable should be set to true for the follower GSLB sites. When configure\_gslb is set to true a SE group will be created automatically | `bool` | `"false"` | no |
 | <a name="input_create_iam"></a> [create\_iam](#input\_create\_iam) | Create IAM policy, roles, and instance profile for Avi AWS Full Access Cloud. If set to false the aws\_access\_key and aws\_secret\_key variables will be used for the Cloud configuration and all policy must be created as found in https://avinetworks.com/docs/latest/iam-role-setup-for-installation-into-aws/ | `bool` | `"true"` | no |
 | <a name="input_create_networking"></a> [create\_networking](#input\_create\_networking) | This variable controls the VPC and subnet creation for the AVI Controller. When set to false the custom-vpc-name and custom-subnetwork-name must be set. | `bool` | `"true"` | no |
 | <a name="input_custom_controller_name"></a> [custom\_controller\_name](#input\_custom\_controller\_name) | This field can be used to specify a custom controller name to replace the (prefix-avi-controller) standard name.  A numeric iterator will still be appended to the custom name (1,2,3) | `string` | `null` | no |

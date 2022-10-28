@@ -248,7 +248,7 @@ variable "configure_gslb" {
   default = { enabled = "false", site_name = "", domains = [""] }
 }
 variable "create_gslb_se_group" {
-  description = "Create a SE group for GSLB. The gslb_site_name variable must also be configured. This variable should be set to true for the follower GSLB sites. When configure_gslb is set to true a SE group will be created automatically"
+  description = "Create a SE group for GSLB. The site_name parameter of the configure_gslb variable must also be configured. This variable should be set to true for the follower GSLB sites. When configure_gslb is set to true a SE group will be created automatically"
   type        = bool
   default     = "false"
 }
