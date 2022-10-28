@@ -70,7 +70,7 @@ module "avi_controller_aws_west2" {
   create_networking     = "false"
   create_iam            = "true"
   controller_ha         = true
-  avi_version           = "22.1.1"
+  avi_version           = "22.1.2"
   custom_vpc_id         = "vpc-<id>"
   custom_subnet_ids     = ["subnet-<id>","subnet-<id>","subnet-<id>"]
   avi_cidr_block        = "10.154.0.0/16"
@@ -86,27 +86,27 @@ module "avi_controller_aws_west2" {
   create_gslb_se_group  = "true"
 }
 module "avi_controller_aws_east1" {
-  source                          = "vmware/avi-alb-deployment-aws/aws"
-  providers                       = { aws = aws.east1 }
-  version                         = "1.0.x"
+  source                = "vmware/avi-alb-deployment-aws/aws"
+  providers             = { aws = aws.east1 }
+  version               = "1.0.x"
 
-  region                          = "us-east-1"
-  create_networking               = "false"
-  create_iam                      = "true"
-  controller_ha                   = true
-  avi_version                     = "22.1.1"
-  custom_vpc_id                   = "vpc-<id>"
-  custom_subnet_ids               = ["subnet-<id>","subnet-<id>","subnet-<id>"]
-  avi_cidr_block                  = "10.155.0.0/16"
-  controller_password             = "<newpassword>"
-  key_pair_name                   = "<key>"
-  private_key_path                = "/home/<user>/.ssh/id_rsa"
-  name_prefix                     = "<name>"
-  custom_tags                     = { "Role" : "Avi-Controller", "Owner" : "admin", "Department" : "IT", "shutdown_policy" : "noshut" }
-  se_ha_mode                      = "active/active"
-  configure_dns_profile           = { enabled = "true", type = "AVI", usable_domains = ["east1.avidemo.net"] }
-  configure_dns_vs                 = { enabled = "true", allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
-  configure_gslb                  = { enabled = "true", site_name = "East1", domains = ["gslb.avidemo.net"], additional_sites = [{name = "West2", ip_address_list = module.avi_controller_aws_west2.controllers[*].private_ip_address}] }
+  region                = "us-east-1"
+  create_networking     = "false"
+  create_iam            = "true"
+  controller_ha         = true
+  avi_version           = "22.1.2"
+  custom_vpc_id         = "vpc-<id>"
+  custom_subnet_ids     = ["subnet-<id>","subnet-<id>","subnet-<id>"]
+  avi_cidr_block        = "10.155.0.0/16"
+  controller_password   = "<newpassword>"
+  key_pair_name         = "<key>"
+  private_key_path      = "/home/<user>/.ssh/id_rsa"
+  name_prefix           = "<name>"
+  custom_tags           = { "Role" : "Avi-Controller", "Owner" : "admin", "Department" : "IT", "shutdown_policy" : "noshut" }
+  se_ha_mode            = "active/active"
+  configure_dns_profile = { enabled = "true", type = "AVI", usable_domains = ["east1.avidemo.net"] }
+  configure_dns_vs      = { enabled = "true", allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
+  configure_gslb        = { enabled = "true", site_name = "East1", domains = ["gslb.avidemo.net"], additional_sites = [{name = "West2", ip_address_list = module.avi_controller_aws_west2.controllers[*].private_ip_address}] }
 }
 output "east1_controller_info" {
   value = module.avi_controller_aws_east1.controllers
