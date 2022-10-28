@@ -213,7 +213,7 @@ variable "configure_controller" {
   default     = "true"
 }
 variable "configure_dns_profile" {
-  description = "Configure a DNS Profile for DNS Record Creation for Virtual Services. Supported profiles for the type are AWS or AVI. The AWS DNS Profile is only needed when the AWS Account used for Route53 is different than the Avi Controller and the configure_dns_route_53 variable can be used otherwise"
+  description = "Configure a DNS Profile for DNS Record Creation for Virtual Services. The usable_domains is a list of domains that Avi will be the Authoritative Nameserver for and NS records may need to be created pointing to the Avi Service Engine addresses. Supported profiles for the type parameter are AWS or AVI. The AWS DNS Profile is only needed when the AWS Account used for Route53 is different than the Avi Controller and the configure_dns_route_53 variable can be used otherwise"
   type = object({
     enabled        = bool,
     type           = string,
@@ -236,11 +236,6 @@ variable "configure_dns_vs" {
   description = "Create Avi DNS Virtual Service. The subnet_name parameter must be an existing AWS Subnet. If the allocate_public_ip parameter is set to true a EIP will be allocated for the VS. The VS IP address will automatically be allocated via the AWS IPAM"
   type        = object({ enabled = bool, subnet_name = string, allocate_public_ip = bool })
   default     = { enabled = "false", subnet_name = "", allocate_public_ip = "false" }
-}
-variable "dns_service_domain" {
-  description = "The DNS Domain that will be available for Virtual Services. Avi will be the Authorative Nameserver for this domain and NS records may need to be created pointing to the Avi Service Engine addresses. An example is demo.Avi.com"
-  type        = string
-  default     = ""
 }
 variable "configure_gslb" {
   description = "Configure GSLB. The gslb_site_name, gslb_domains, and configure_dns_vs variables must also be set. Optionally the additional_gslb_sites variable can be used to add active GSLB sites"

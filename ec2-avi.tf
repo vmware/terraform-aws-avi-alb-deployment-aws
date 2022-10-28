@@ -24,7 +24,6 @@ locals {
     controller_names                = local.controller_names
     configure_dns_route_53          = var.configure_dns_route_53
     configure_dns_profile           = var.configure_dns_profile
-    dns_service_domain              = var.dns_service_domain
     configure_dns_vs                = var.configure_dns_vs
     configure_gslb                  = var.configure_gslb
     configure_gslb_additional_sites = var.configure_gslb_additional_sites
