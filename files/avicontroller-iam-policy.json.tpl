@@ -26,6 +26,7 @@
             ],
             "Resource": [
                 "arn:${awsPartition}:iam::*:instance-profile/AviController-Refined-Role",
+                "arn:${awsPartition}:iam::*:instance-profile/*_avi_instance_profile",
                 "arn:${awsPartition}:iam::*:policy/AviController*",
                 "arn:${awsPartition}:iam::*:role/vmimport",
                 "arn:${awsPartition}:iam::*:role/AviController-Refined-Role"
@@ -35,8 +36,21 @@
             "Sid": "VisualEditor2",
             "Effect": "Allow",
             "Action": [
+                "iam:GetPolicy",
+                "iam:GetPolicyVersion",
+                "iam:GetRole",
+                "iam:GetRolePolicy",
+                "iam:ListAttachedRolePolicies",
                 "iam:ListPolicies",
-                "iam:ListRoles"
+                "iam:ListRolePolicies",
+                "iam:ListRoles",
+                "iam:ListAccountAliases",
+                "iam:ListAttachedUserPolicies",
+                "iam:ListAttachedGroupPolicies",
+                "iam:GetUserPolicy",
+                "iam:GetGroupPolicy",
+                "iam:ListUserPolicies",
+                "iam:ListgroupPolicies"
             ],
             "Resource": "*"
         }
