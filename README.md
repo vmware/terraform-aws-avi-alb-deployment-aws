@@ -19,7 +19,7 @@ The Ansible playbook can optionally add these configurations:
 * Configure GSLB (configured with configure_gslb, gslb_site_name, gslb_domains, and configure_gslb_additional_sites variables)
 
 ## Usage
-This is an example of a controller deployment that leverages an existing VPC (with a cidr_block of 10.154.0.0/16) and 3 subnets. The public key is already created in EC2 and the private key found in the "/home/{user}/.ssh/id_rsa" will be used to copy and run the Ansible playbook to configure the Controller.
+This is an example of a controller deployment that leverages an existing VPC (with a cidr_block of 10.154.0.0/16) and 3 subnets. The public key is already created in EC2 and the private key found in the "/home/user/.ssh/id_rsa" will be used to copy and run the Ansible playbook to configure the Controller.
 ```hcl
 terraform {
   backend "local" {
