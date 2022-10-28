@@ -57,11 +57,8 @@
     route53_integration: ${configure_dns_route_53}
     configure_dns_profile: 
       ${ indent(6, yamlencode(configure_dns_profile))}
-    configure_dns_vs: ${configure_dns_vs}
-%{ if configure_dns_vs ~}
-    dns_vs_settings: 
-      ${ indent(6, yamlencode(dns_vs_settings))}
-%{ endif ~}
+    configure_dns_vs:
+      ${ indent(6, yamlencode(configure_dns_vs))}
     configure_gslb: ${configure_gslb}
     create_gslb_se_group: ${create_gslb_se_group}
     gslb_user: "gslb-admin"
@@ -399,7 +396,7 @@
           avi_api_session:
             avi_credentials: "{{ avi_credentials }}"
             http_method: get
-            path: "vimgrnwruntime?name={{ dns_vs_settings.subnet_name }}"
+            path: "vimgrnwruntime?name={{ configure_dns_vs.subnet_name }}"
           register: dns_vs_subnet
 
         - name: Create DNS VSVIP
@@ -418,9 +415,9 @@
               - enabled: true
                 vip_id: 0      
                 auto_allocate_ip: "true"
-                auto_allocate_floating_ip: "{{ dns_vs_settings.allocate_public_ip }}"
+                auto_allocate_floating_ip: "{{ configure_dns_vs.allocate_public_ip }}"
                 avi_allocated_vip: true
-                avi_allocated_fip: "{{ dns_vs_settings.allocate_public_ip }}"
+                avi_allocated_fip: "{{ configure_dns_vs.allocate_public_ip }}"
                 auto_allocate_ip_type: V4_ONLY
                 prefix_length: 32
                 placement_networks: []
@@ -484,7 +481,7 @@
             avi_api_patch_op: add
             tenant: admin
             dns_virtualservice_refs: "{{ dns_vs.obj.url }}"
-      when: configure_dns_vs == true
+      when: configure_dns_vs.enabled == true
       tags: configure_dns_vs
 
     - name: Configure GSLB

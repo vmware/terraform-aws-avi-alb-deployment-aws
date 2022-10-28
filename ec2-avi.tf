@@ -26,7 +26,6 @@ locals {
     configure_dns_profile           = var.configure_dns_profile
     dns_service_domain              = var.dns_service_domain
     configure_dns_vs                = var.configure_dns_vs
-    dns_vs_settings                 = var.dns_vs_settings
     configure_gslb                  = var.configure_gslb
     configure_gslb_additional_sites = var.configure_gslb_additional_sites
     gslb_site_name                  = var.gslb_site_name

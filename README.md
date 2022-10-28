@@ -15,7 +15,7 @@ During the creation of the Controller instance the following initialization step
 
 The Ansible playbook can optionally add these configurations:
 * Create Avi DNS Profile (configured with configure_dns_profile variable)
-* Create Avi DNS Virtual Service (configured with configure_dns_vs and dns_vs_settings variables)
+* Create Avi DNS Virtual Service (configured with configure_dns_vs variable)
 * Configure GSLB (configured with configure_gslb, gslb_site_name, gslb_domains, and configure_gslb_additional_sites variables)
 
 ## Usage
@@ -72,8 +72,7 @@ module "avi_controller_aws_west2" {
   custom_tags           = { "Role" : "Avi-Controller", "Owner" : "admin", "Department" : "IT" }
   se_ha_mode            = "active/active"
   configure_dns_profile = { enabled = "true", type = "AVI", usable_domains = ["west1.avidemo.net"] }
-  configure_dns_vs      = "true"
-  dns_vs_settings       = { allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
+  configure_dns_vs      = { enabled = "true", allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
   create_gslb_se_group  = "true"
   gslb_site_name        = "West2"
 }
@@ -96,8 +95,7 @@ module "avi_controller_aws_east1" {
   custom_tags                     = { "Role" : "Avi-Controller", "Owner" : "admin", "Department" : "IT", "shutdown_policy" : "noshut" }
   se_ha_mode                      = "active/active"
   configure_dns_profile           = { enabled = "true", type = "AVI", usable_domains = ["east1.avidemo.net"] }
-  configure_dns_vs                = "true"
-  dns_vs_settings                 = { allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
+  configure_dns_vs                 = { enabled = "true", allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
   configure_gslb                  = "true"
   gslb_site_name                  = "East1"
   gslb_domains                    = ["gslb.avidemo.net"]
@@ -234,7 +232,7 @@ No modules.
 | <a name="input_configure_controller"></a> [configure\_controller](#input\_configure\_controller) | Configure the Avi Cloud via Ansible after controller deployment. If not set to true this must be done manually with the desired config | `bool` | `"true"` | no |
 | <a name="input_configure_dns_profile"></a> [configure\_dns\_profile](#input\_configure\_dns\_profile) | Configure a DNS Profile for DNS Record Creation for Virtual Services. Supported profiles for the type are AWS or AVI. The AWS DNS Profile is only needed when the AWS Account used for Route53 is different than the Avi Controller and the configure\_dns\_route\_53 variable can be used otherwise | <pre>object({<br>    enabled        = bool,<br>    type           = string,<br>    usable_domains = list(string),<br>    ttl            = optional(string),<br>    aws_profile    = optional(object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string }))<br>  })</pre> | <pre>{<br>  "enabled": false,<br>  "ttl": "30",<br>  "type": "AVI",<br>  "usable_domains": []<br>}</pre> | no |
 | <a name="input_configure_dns_route_53"></a> [configure\_dns\_route\_53](#input\_configure\_dns\_route\_53) | Configures Route53 DNS integration in the AWS Cloud configuration. The following variables must be set to false if enabled: configure\_dns\_profile, configure\_dns\_vs, configure\_gslb | `bool` | `"false"` | no |
-| <a name="input_configure_dns_vs"></a> [configure\_dns\_vs](#input\_configure\_dns\_vs) | Create Avi DNS Virtual Service. The configure\_dns\_profile variable must also be set to true | `bool` | `"false"` | no |
+| <a name="input_configure_dns_vs"></a> [configure\_dns\_vs](#input\_configure\_dns\_vs) | Create Avi DNS Virtual Service. The subnet\_name parameter must be an existing AWS Subnet. If the allocate\_public\_ip parameter is set to true a EIP will be allocated for the VS. The VS IP address will automatically be allocated via the AWS IPAM | `object({ enabled = bool, subnet_name = string, allocate_public_ip = bool })` | <pre>{<br>  "allocate_public_ip": "false",<br>  "enabled": "false",<br>  "subnet_name": ""<br>}</pre> | no |
 | <a name="input_configure_gslb"></a> [configure\_gslb](#input\_configure\_gslb) | Configure GSLB. The gslb\_site\_name, gslb\_domains, and configure\_dns\_vs variables must also be set. Optionally the additional\_gslb\_sites variable can be used to add active GSLB sites | `bool` | `"false"` | no |
 | <a name="input_configure_gslb_additional_sites"></a> [configure\_gslb\_additional\_sites](#input\_configure\_gslb\_additional\_sites) | Configure additional GSLB Sites. The additional\_gslb\_sites, gslb\_site\_name, gslb\_domains, and configure\_dns\_vs variables must also be set | `bool` | `"false"` | no |
 | <a name="input_controller_ebs_encryption"></a> [controller\_ebs\_encryption](#input\_controller\_ebs\_encryption) | Enable encryption on the Controller EBS Root Volume.  The AWS Managed EBS KMS key will be used if no key is provided with the controller\_ebs\_encryption\_key\_arn variable | `bool` | `"true"` | no |
@@ -253,7 +251,6 @@ No modules.
 | <a name="input_dns_search_domain"></a> [dns\_search\_domain](#input\_dns\_search\_domain) | The optional DNS search domain that will be used by the controller | `string` | `null` | no |
 | <a name="input_dns_servers"></a> [dns\_servers](#input\_dns\_servers) | The optional DNS servers that will be used for local DNS resolution by the controller. Example ["8.8.4.4", "8.8.8.8"] | `list(string)` | `null` | no |
 | <a name="input_dns_service_domain"></a> [dns\_service\_domain](#input\_dns\_service\_domain) | The DNS Domain that will be available for Virtual Services. Avi will be the Authorative Nameserver for this domain and NS records may need to be created pointing to the Avi Service Engine addresses. An example is demo.Avi.com | `string` | `""` | no |
-| <a name="input_dns_vs_settings"></a> [dns\_vs\_settings](#input\_dns\_vs\_settings) | Settings for the DNS Virtual Service. The subnet\_name must be an existing AWS Subnet. If the allocate\_public\_ip option is set to true a EIP will be allocated for the VS. The VS IP address will automatically be allocated via the AWS IPAM. Example:{ subnet\_name = "subnet-dns", allocate\_public\_ip = "true" } | `object({ subnet_name = string, allocate_public_ip = bool })` | `null` | no |
 | <a name="input_email_config"></a> [email\_config](#input\_email\_config) | The Email settings that will be used for sending password reset information or for trigged alerts. The default setting will send emails directly from the Avi Controller | `object({ smtp_type = string, from_email = string, mail_server_name = string, mail_server_port = string, auth_username = string, auth_password = string })` | <pre>{<br>  "auth_password": "",<br>  "auth_username": "",<br>  "from_email": "admin@avicontroller.net",<br>  "mail_server_name": "localhost",<br>  "mail_server_port": "25",<br>  "smtp_type": "SMTP_LOCAL_HOST"<br>}</pre> | no |
 | <a name="input_firewall_controller_allow_source_range"></a> [firewall\_controller\_allow\_source\_range](#input\_firewall\_controller\_allow\_source\_range) | The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default | `string` | `"0.0.0.0/0"` | no |
 | <a name="input_firewall_controller_security_group_ids"></a> [firewall\_controller\_security\_group\_ids](#input\_firewall\_controller\_security\_group\_ids) | List of security group IDs that will be assigned to the controller. This variable must be set if the create\_firewall\_rules variable is set to false | `list(string)` | `null` | no |

@@ -233,14 +233,9 @@ variable "configure_dns_route_53" {
   default     = "false"
 }
 variable "configure_dns_vs" {
-  description = "Create Avi DNS Virtual Service. The configure_dns_profile variable must also be set to true"
-  type        = bool
-  default     = "false"
-}
-variable "dns_vs_settings" {
-  description = "Settings for the DNS Virtual Service. The subnet_name must be an existing AWS Subnet. If the allocate_public_ip option is set to true a EIP will be allocated for the VS. The VS IP address will automatically be allocated via the AWS IPAM. Example:{ subnet_name = \"subnet-dns\", allocate_public_ip = \"true\" }"
-  type        = object({ subnet_name = string, allocate_public_ip = bool })
-  default     = null
+  description = "Create Avi DNS Virtual Service. The subnet_name parameter must be an existing AWS Subnet. If the allocate_public_ip parameter is set to true a EIP will be allocated for the VS. The VS IP address will automatically be allocated via the AWS IPAM"
+  type        = object({ enabled = bool, subnet_name = string, allocate_public_ip = bool })
+  default     = { enabled = "false", subnet_name = "", allocate_public_ip = "false" }
 }
 variable "dns_service_domain" {
   description = "The DNS Domain that will be available for Virtual Services. Avi will be the Authorative Nameserver for this domain and NS records may need to be created pointing to the Avi Service Engine addresses. An example is demo.Avi.com"

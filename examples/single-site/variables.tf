@@ -62,9 +62,9 @@ variable "configure_dns_profile" {
   }
 }
 variable "configure_dns_vs" {
-  description = "Create DNS Virtual Service. The configure_dns_profile and configure_ipam_profile variables must be set to true and their associated configuration variables must also be set"
-  type        = bool
-  default     = false
+  description = "Create Avi DNS Virtual Service. The subnet_name parameter must be an existing AWS Subnet. If the allocate_public_ip parameter is set to true a EIP will be allocated for the VS. The VS IP address will automatically be allocated via the AWS IPAM"
+  type        = object({ enabled = bool, subnet_name = string, allocate_public_ip = bool })
+  default     = { enabled = "false", subnet_name = "", allocate_public_ip = "false" }
 }
 variable "aws_secret_key" {
   description = "The AWS Secret Key that will be used by Terraform and the Avi Controller resources"
@@ -91,10 +91,5 @@ variable "custom_vpc_id" {
 variable "custom_subnet_ids" {
   description = "This field can be used to specify a list of existing VPC Subnets for the controller and SEs. The create-networking variable must also be set to false for this network to be used."
   type        = list(string)
-  default     = null
-}
-variable "dns_vs_settings" {
-  description = "Settings for the DNS Virtual Service. The subnet_name must be an existing AWS Subnet. If the allocate_public_ip option is set to true a EIP will be allocated for the VS. The VS IP address will automatically be allocated via the AWS IPAM. Example:{ subnet_name = \"subnet-dns\", allocate_public_ip = \"true\" }"
-  type        = object({ subnet_name = string, allocate_public_ip = bool })
   default     = null
 }
