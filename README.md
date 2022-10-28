@@ -116,7 +116,7 @@ output "westus2_controller_info" {
 }
 ```
 ## Day 1 Ansible Configuration and Avi Resource Cleanup
-The module copies and runs an Ansible play for configuring the initial day 1 Avi config. The plays listed below can be reviewed by connecting to the Avi Controller by SSH. In an HA setup the first controller will have these files. 
+The module copies and runs an Ansible play for configuring the initial day 1 Avi config. The plays listed below can be reviewed by connecting to the Avi Controller by SSH and changing to the ansible folder. In an HA setup the first controller will have these files. 
 
 ### avi-controller-aws-all-in-one-play.yml
 This play will configure the Avi Cloud, Network, IPAM/DNS profiles, DNS Virtual Service, GSLB depending on the variables used. The initial run of this play will output into the ansible-playbook.log file which can be reviewed to determine what tasks were ran. 
