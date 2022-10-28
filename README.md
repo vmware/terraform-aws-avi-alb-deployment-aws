@@ -53,8 +53,17 @@ terraform {
   backend "local" {
   }
 }
+provider "aws" {
+  alias  = "west2"
+  region = "us-west-2"
+}
+provider "aws" {
+  alias  = "east1"
+  region = "us-east-1"
+}
 module "avi_controller_aws_west2" {
   source                = "vmware/avi-alb-deployment-aws/aws"
+  providers             = { aws = aws.west2 }
   version               = "1.0.x"
 
   region                = "us-west-2"
@@ -73,12 +82,13 @@ module "avi_controller_aws_west2" {
   se_ha_mode            = "active/active"
   configure_dns_profile = { enabled = "true", type = "AVI", usable_domains = ["west1.avidemo.net"] }
   configure_dns_vs      = { enabled = "true", allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
+  configure_gslb        = { enabled = "false", site_name = "West2"}
   create_gslb_se_group  = "true"
-  gslb_site_name        = "West2"
 }
 module "avi_controller_aws_east1" {
-  source  = "vmware/avi-alb-deployment-aws/aws"
-  version = "1.0.x"
+  source                          = "vmware/avi-alb-deployment-aws/aws"
+  providers                       = { aws = aws.east1 }
+  version                         = "1.0.x"
 
   region                          = "us-east-1"
   create_networking               = "false"
@@ -96,11 +106,7 @@ module "avi_controller_aws_east1" {
   se_ha_mode                      = "active/active"
   configure_dns_profile           = { enabled = "true", type = "AVI", usable_domains = ["east1.avidemo.net"] }
   configure_dns_vs                 = { enabled = "true", allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
-  configure_gslb                  = "true"
-  gslb_site_name                  = "East1"
-  gslb_domains                    = ["gslb.avidemo.net"]
-  configure_gslb_additional_sites = "true"
-  additional_gslb_sites           = [{name = "West2", ip_address_list = module.avi_controller_aws_west2.controllers[*].private_ip_address, dns_vs_name = "DNS-VS"}]
+  configure_gslb                  = { enabled = "true", site_name = "East1", domains = ["gslb.avidemo.net"], additional_sites = [{name = "West2", ip_address_list = module.avi_controller_aws_west2.controllers[*].private_ip_address}] }
 }
 output "east1_controller_info" {
   value = module.avi_controller_aws_east1.controllers
@@ -222,7 +228,6 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_additional_gslb_sites"></a> [additional\_gslb\_sites](#input\_additional\_gslb\_sites) | The Names and IP addresses of the GSLB Sites that will be configured. If the Site is a controller cluster the ip\_address\_list should have the ip address of each controller. The configure\_gslb\_additional\_sites variable must also be set to true for the sites to be added | `list(object({ name = string, ip_address_list = list(string), dns_vs_name = string }))` | <pre>[<br>  {<br>    "dns_vs_name": "DNS-VS",<br>    "ip_address_list": [<br>      ""<br>    ],<br>    "name": ""<br>  }<br>]</pre> | no |
 | <a name="input_avi_cidr_block"></a> [avi\_cidr\_block](#input\_avi\_cidr\_block) | This CIDR that will be used for creating a subnet in the AVI VPC - a /16 should be provided. This range is also used for security group rules source IP range for internal communication between the Controllers and SEs | `string` | `"10.255.0.0/16"` | no |
 | <a name="input_avi_upgrade"></a> [avi\_upgrade](#input\_avi\_upgrade) | This variable determines if a patch upgrade is performed after install. The enabled key should be set to true and the url from the Avi Cloud Services portal for the should be set for the upgrade\_file\_uri key. Valid upgrade\_type values are patch or system | `object({ enabled = bool, upgrade_type = string, upgrade_file_uri = string })` | <pre>{<br>  "enabled": "false",<br>  "upgrade_file_uri": "",<br>  "upgrade_type": "patch"<br>}</pre> | no |
 | <a name="input_avi_version"></a> [avi\_version](#input\_avi\_version) | The AVI Controller version that will be deployed | `string` | n/a | yes |
@@ -233,8 +238,7 @@ No modules.
 | <a name="input_configure_dns_profile"></a> [configure\_dns\_profile](#input\_configure\_dns\_profile) | Configure a DNS Profile for DNS Record Creation for Virtual Services. The usable\_domains is a list of domains that Avi will be the Authoritative Nameserver for and NS records may need to be created pointing to the Avi Service Engine addresses. Supported profiles for the type parameter are AWS or AVI. The AWS DNS Profile is only needed when the AWS Account used for Route53 is different than the Avi Controller and the configure\_dns\_route\_53 variable can be used otherwise | <pre>object({<br>    enabled        = bool,<br>    type           = string,<br>    usable_domains = list(string),<br>    ttl            = optional(string),<br>    aws_profile    = optional(object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string }))<br>  })</pre> | <pre>{<br>  "enabled": false,<br>  "ttl": "30",<br>  "type": "AVI",<br>  "usable_domains": []<br>}</pre> | no |
 | <a name="input_configure_dns_route_53"></a> [configure\_dns\_route\_53](#input\_configure\_dns\_route\_53) | Configures Route53 DNS integration in the AWS Cloud configuration. The following variables must be set to false if enabled: configure\_dns\_profile, configure\_dns\_vs, configure\_gslb | `bool` | `"false"` | no |
 | <a name="input_configure_dns_vs"></a> [configure\_dns\_vs](#input\_configure\_dns\_vs) | Create Avi DNS Virtual Service. The subnet\_name parameter must be an existing AWS Subnet. If the allocate\_public\_ip parameter is set to true a EIP will be allocated for the VS. The VS IP address will automatically be allocated via the AWS IPAM | `object({ enabled = bool, subnet_name = string, allocate_public_ip = bool })` | <pre>{<br>  "allocate_public_ip": "false",<br>  "enabled": "false",<br>  "subnet_name": ""<br>}</pre> | no |
-| <a name="input_configure_gslb"></a> [configure\_gslb](#input\_configure\_gslb) | Configure GSLB. The gslb\_site\_name, gslb\_domains, and configure\_dns\_vs variables must also be set. Optionally the additional\_gslb\_sites variable can be used to add active GSLB sites | `bool` | `"false"` | no |
-| <a name="input_configure_gslb_additional_sites"></a> [configure\_gslb\_additional\_sites](#input\_configure\_gslb\_additional\_sites) | Configure additional GSLB Sites. The additional\_gslb\_sites, gslb\_site\_name, gslb\_domains, and configure\_dns\_vs variables must also be set | `bool` | `"false"` | no |
+| <a name="input_configure_gslb"></a> [configure\_gslb](#input\_configure\_gslb) | Configures GSLB. The gslb\_site\_name parameter is the name of the GSLB site the deployed Controller(s) will be a member of. The gslb\_domains parameter is a list of GSLB domains that will be configured. In addition to this variable the configure\_dns\_vs variable must also be set. Optionally the additional\_gslb\_sites parameter can be used to add additional active GSLB sites | <pre>object({<br>    enabled          = bool,<br>    site_name        = string,<br>    domains          = optional(list(string)),<br>    additional_sites = optional(list(object({ name = string, ip_address_list = list(string) }))),<br>  })</pre> | <pre>{<br>  "domains": [<br>    ""<br>  ],<br>  "enabled": "false",<br>  "site_name": ""<br>}</pre> | no |
 | <a name="input_controller_ebs_encryption"></a> [controller\_ebs\_encryption](#input\_controller\_ebs\_encryption) | Enable encryption on the Controller EBS Root Volume.  The AWS Managed EBS KMS key will be used if no key is provided with the controller\_ebs\_encryption\_key\_arn variable | `bool` | `"true"` | no |
 | <a name="input_controller_ebs_encryption_key_arn"></a> [controller\_ebs\_encryption\_key\_arn](#input\_controller\_ebs\_encryption\_key\_arn) | AWS Resource Name of an existing KMS key for the Controller EBS (controller\_ebs\_encryption must be set to true) | `string` | `null` | no |
 | <a name="input_controller_ha"></a> [controller\_ha](#input\_controller\_ha) | If true a HA controller cluster is deployed and configured | `bool` | `"false"` | no |
@@ -254,9 +258,7 @@ No modules.
 | <a name="input_firewall_controller_allow_source_range"></a> [firewall\_controller\_allow\_source\_range](#input\_firewall\_controller\_allow\_source\_range) | The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default | `string` | `"0.0.0.0/0"` | no |
 | <a name="input_firewall_controller_security_group_ids"></a> [firewall\_controller\_security\_group\_ids](#input\_firewall\_controller\_security\_group\_ids) | List of security group IDs that will be assigned to the controller. This variable must be set if the create\_firewall\_rules variable is set to false | `list(string)` | `null` | no |
 | <a name="input_firewall_se_data_rules"></a> [firewall\_se\_data\_rules](#input\_firewall\_se\_data\_rules) | The data plane traffic allowed for Virtual Services hosted on Services Engines. The configure\_firewall\_rules variable must be set to true for these rules to be created | `list(object({ protocol = string, port = string, allow_ip_range = string, description = string }))` | <pre>[<br>  {<br>    "allow_ip_range": "0.0.0.0/0",<br>    "description": "https",<br>    "port": "443",<br>    "protocol": "tcp"<br>  },<br>  {<br>    "allow_ip_range": "10.0.0.0/8",<br>    "description": "DNS",<br>    "port": "53",<br>    "protocol": "udp"<br>  }<br>]</pre> | no |
-| <a name="input_gslb_domains"></a> [gslb\_domains](#input\_gslb\_domains) | A list of GSLB domains that will be configured | `list(string)` | <pre>[<br>  ""<br>]</pre> | no |
 | <a name="input_gslb_se_instance_type"></a> [gslb\_se\_instance\_type](#input\_gslb\_se\_instance\_type) | The instance\_type of the GSLB Service Engine group. The default is 2 vCPU, 8 GB RAM, and a 30 GB Disk per Service Engine. Syntax ["cpu\_cores", "memory\_in\_GB", "disk\_size\_in\_GB"] | `string` | `"c5.xlarge"` | no |
-| <a name="input_gslb_site_name"></a> [gslb\_site\_name](#input\_gslb\_site\_name) | The name of the GSLB site the deployed Controller(s) will be a member of. | `string` | `""` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The EC2 instance type for the Avi Controller | `string` | `"m5.2xlarge"` | no |
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | The name of the existing EC2 Key pair that will be used to authenticate to the Avi Controller | `string` | n/a | yes |
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | This prefix is appended to the names of the Controller and SEs | `string` | n/a | yes |

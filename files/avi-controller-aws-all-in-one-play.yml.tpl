@@ -59,14 +59,11 @@
       ${ indent(6, yamlencode(configure_dns_profile))}
     configure_dns_vs:
       ${ indent(6, yamlencode(configure_dns_vs))}
-    configure_gslb: ${configure_gslb}
+    configure_gslb:
+      ${ indent(6, yamlencode(configure_gslb))}
     create_gslb_se_group: ${create_gslb_se_group}
     gslb_user: "gslb-admin"
     gslb_se_instance_type: ${gslb_se_instance_type}
-    gslb_site_name: ${gslb_site_name}
-    configure_gslb_additional_sites: ${configure_gslb_additional_sites}
-    additional_gslb_sites:
-      ${ indent(6, yamlencode(additional_gslb_sites))}
 %{ if avi_upgrade.enabled || register_controller.enabled  ~}
     avi_upgrade:
       enabled: ${avi_upgrade.enabled}
@@ -181,6 +178,7 @@
               mgmt_network_uuid: "${mgmt_subnet["mgmt_network_uuid"]}"
 %{ endfor ~}
       register: avi_cloud
+      ignore_errors: yes
 
     - name: Set Backup Passphrase
       avi_backupconfiguration:
@@ -192,92 +190,83 @@
 
 %{ if se_ha_mode == "active/active" ~}
     - name: Configure SE-Group
-      avi_api_session:
+      avi_serviceenginegroup:
         avi_credentials: "{{ avi_credentials }}"
-        http_method: post
-        path: "serviceenginegroup"
         tenant: "admin"
-        data:
-          name: "Default-Group" 
-          cloud_ref: "/api/cloud?name={{ cloud_name }}"
-          ha_mode: HA_MODE_SHARED_PAIR
-          min_scaleout_per_vs: 2
-          algo: PLACEMENT_ALGO_PACKED
-          buffer_se: "0"
-          max_se: "10"
-          se_name_prefix: "{{ name_prefix }}"
-          accelerated_networking: true
-          instance_flavor: "{{ se_instance_type }}"
+        name: "Default-Group" 
+        cloud_ref: "/api/cloud?name={{ cloud_name }}"
+        ha_mode: HA_MODE_SHARED_PAIR
+        min_scaleout_per_vs: 2
+        algo: PLACEMENT_ALGO_PACKED
+        buffer_se: "0"
+        max_se: "10"
+        se_name_prefix: "{{ name_prefix }}"
+        accelerated_networking: true
+        instance_flavor: "{{ se_instance_type }}"
 %{ if create_firewall_rules ~}
-          disable_avi_securitygroups: true
-          custom_securitygroups_mgmt:
-            - "{{ mgmt_security_group }}"
-          custom_securitygroups_data:
-            - "{{ data_security_group }}"
+        disable_avi_securitygroups: true
+        custom_securitygroups_mgmt:
+          - "{{ mgmt_security_group }}"
+        custom_securitygroups_data:
+          - "{{ data_security_group }}"
 %{ endif ~}
-          realtime_se_metrics:
-            duration: "10080"
-            enabled: true
+        realtime_se_metrics:
+          duration: "10080"
+          enabled: true
 
 %{ endif ~}
 %{ if se_ha_mode == "n+m" ~}
     - name: Configure SE-Group
-      avi_api_session:
+      avi_serviceenginegroup:
         avi_credentials: "{{ avi_credentials }}"
-        http_method: post
-        path: "serviceenginegroup"
         tenant: "admin"
-        data:
-          name: "Default-Group" 
-          state: present
-          cloud_ref: "{{ avi_cloud.obj.url }}"
-          ha_mode: HA_MODE_SHARED
-          min_scaleout_per_vs: 1
-          algo: PLACEMENT_ALGO_PACKED
-          buffer_se: "1"
-          max_se: "10"
-          se_name_prefix: "{{ name_prefix }}"
-          instance_flavor: "{{ se_instance_type }}"
-          accelerated_networking: true
+        name: "Default-Group" 
+        state: present
+        cloud_ref: "/api/cloud?name={{ cloud_name }}"
+        ha_mode: HA_MODE_SHARED
+        min_scaleout_per_vs: 1
+        algo: PLACEMENT_ALGO_PACKED
+        buffer_se: "1"
+        max_se: "10"
+        se_name_prefix: "{{ name_prefix }}"
+        instance_flavor: "{{ se_instance_type }}"
+        accelerated_networking: true
 %{ if create_firewall_rules ~}
-          disable_avi_securitygroups: true
-          custom_securitygroups_mgmt:
-            - "{{ mgmt_security_group }}"
-          custom_securitygroups_data:
-            - "{{ data_security_group }}"
+        disable_avi_securitygroups: true
+        custom_securitygroups_mgmt:
+          - "{{ mgmt_security_group }}"
+        custom_securitygroups_data:
+          - "{{ data_security_group }}"
 %{ endif ~}
-          realtime_se_metrics:
-            duration: "10080"
-            enabled: true
+        realtime_se_metrics:
+          duration: "10080"
+          enabled: true
 
 %{ endif ~}
 %{ if se_ha_mode == "active/standby" ~}
     - name: Configure SE-Group
-      avi_api_session:
+      avi_serviceenginegroup:
         avi_credentials: "{{ avi_credentials }}"
-        http_method: post
-        path: "serviceenginegroup"
         tenant: "admin"
-        data:
-          name: "Default-Group" 
-          cloud_ref: "{{ avi_cloud.obj.url }}"
-          ha_mode: HA_MODE_LEGACY_ACTIVE_STANDBY
-          min_scaleout_per_vs: 1
-          buffer_se: "0"
-          max_se: "2"
-          se_name_prefix: "{{ name_prefix }}"
-          instance_flavor: "{{ se_instance_type }}"
-          accelerated_networking: true
+        name: "Default-Group" 
+        cloud_ref: "/api/cloud?name={{ cloud_name }}"
+        ha_mode: HA_MODE_LEGACY_ACTIVE_STANDBY
+        min_scaleout_per_vs: 1
+        buffer_se: "0"
+        max_se: "2"
+        se_name_prefix: "{{ name_prefix }}"
+        instance_flavor: "{{ se_instance_type }}"
+        accelerated_networking: true
 %{ if create_firewall_rules ~}
-          disable_avi_securitygroups: true
-          custom_securitygroups_mgmt:
-            - "{{ mgmt_security_group }}"
-          custom_securitygroups_data:
-            - "{{ data_security_group }}"
+        disable_avi_securitygroups: true
+        custom_securitygroups_mgmt:
+          - "{{ mgmt_security_group }}"
+        custom_securitygroups_data:
+          - "{{ data_security_group }}"
 %{ endif ~}
-          realtime_se_metrics:
-            duration: "10080"
-            enabled: true
+        realtime_se_metrics:
+          duration: "10080"
+          enabled: true
 
 %{ endif ~}
     - name: Configure DNS Profile
@@ -313,11 +302,12 @@
           avi_api_session:
             avi_credentials: "{{ avi_credentials }}"
             http_method: patch
-            path: "cloud/{{ avi_cloud.obj.uuid }}"
+            path: "cloud?name={{ cloud_name }}"
             data:
               add:
                 dns_provider_ref: "{{ create_dns_avi.obj.url }}"
           when: configure_dns_profile.type == "AVI"
+          ignore_errors: yes
 
         - name: Create AWS Route53 DNS Profile
           avi_ipamdnsproviderprofile:
@@ -340,37 +330,35 @@
           avi_api_session:
             avi_credentials: "{{ avi_credentials }}"
             http_method: patch
-            path: "cloud/{{ avi_cloud.obj.uuid }}"
+            path: "cloud?name={{ cloud_name }}"
             data:
               add:
                 dns_provider_ref: "{{ create_dns_aws.obj.url }}"
           when: configure_dns_profile.type == "AWS" and route53_integration == false
       when: configure_dns_profile.enabled == true
       tags: dns_profile
+      ignore_errors: yes
     
     - name: Configure GSLB SE Group and Account
       block:
         - name: Configure GSLB SE-Group
-          avi_api_session:
+          avi_serviceenginegroup:
             avi_credentials: "{{ avi_credentials }}"
-            http_method: post
-            path: "serviceenginegroup"
             tenant: "admin"
-            data:
-              name: "g-dns" 
-              cloud_ref: "{{ avi_cloud.obj.url }}"
-              ha_mode: HA_MODE_SHARED_PAIR
-              min_scaleout_per_vs: 2
-              algo: PLACEMENT_ALGO_PACKED
-              buffer_se: "0"
-              max_se: "4"
-              max_vs_per_se: "1"
-              extra_shared_config_memory: 2000
-              instance_flavor: "{{ gslb_se_instance_type }}"
-              se_name_prefix: "{{ name_prefix }}{{ gslb_site_name }}"
-              realtime_se_metrics:
-                duration: "60"
-                enabled: true
+            name: "g-dns" 
+            cloud_ref: "/api/cloud?name={{ cloud_name }}"
+            ha_mode: HA_MODE_SHARED_PAIR
+            min_scaleout_per_vs: 2
+            algo: PLACEMENT_ALGO_PACKED
+            buffer_se: "0"
+            max_se: "4"
+            max_vs_per_se: "1"
+            extra_shared_config_memory: 2000
+            instance_flavor: "{{ gslb_se_instance_type }}"
+            se_name_prefix: "{{ name_prefix }}{{ configure_gslb.site_name }}"
+            realtime_se_metrics:
+              duration: "60"
+              enabled: true
           register: gslb_se_group
 
         - name: Create User for GSLB
@@ -387,7 +375,7 @@
             is_superuser: false
             obj_password: "{{ password }}"
             obj_username: "{{ gslb_user }}"
-      when: configure_gslb == true or create_gslb_se_group == true
+      when: configure_gslb.enabled == true or create_gslb_se_group == true
       tags: gslb
 
     - name: Configure DNS Virtual Service
@@ -400,75 +388,64 @@
           register: dns_vs_subnet
 
         - name: Create DNS VSVIP
-          avi_api_session:
+          avi_vsvip:
             avi_credentials: "{{ avi_credentials }}"
-            http_method: post
-            path: "vsvip"
             tenant: "admin"
-            data:
-              east_west_placement: false
-              cloud_ref: "{{ avi_cloud.obj.url }}"
-%{ if configure_gslb || create_gslb_se_group ~}
-              se_group_ref: "{{ gslb_se_group.obj.url }}"
-%{ endif ~}
-              vip:
-              - enabled: true
-                vip_id: 0      
-                auto_allocate_ip: "true"
-                auto_allocate_floating_ip: "{{ configure_dns_vs.allocate_public_ip }}"
-                avi_allocated_vip: true
-                avi_allocated_fip: "{{ configure_dns_vs.allocate_public_ip }}"
-                auto_allocate_ip_type: V4_ONLY
-                prefix_length: 32
-                placement_networks: []
-                ipam_network_subnet:
-                  network_ref: "{{ dns_vs_subnet.obj.results.0.url }}"
-                  subnet:
-                    ip_addr:
-                      addr: "{{ dns_vs_subnet.obj.results.0.ip_subnet.0.prefix.ip_addr.addr }}"
-                      type: "{{ dns_vs_subnet.obj.results.0.ip_subnet.0.prefix.ip_addr.type }}"
-                    mask: "{{ dns_vs_subnet.obj.results.0.ip_subnet.0.prefix.mask }}"
-              dns_info:
-              - type: DNS_RECORD_A
-                algorithm: DNS_RECORD_RESPONSE_CONSISTENT_HASH
-                fqdn: "dns.{{ configure_dns_profile.usable_domains.0 }}"
-              name: vsvip-DNS-VS-Default-Cloud
+            cloud_ref: "/api/cloud?name={{ cloud_name }}"
+            vip:
+            - enabled: true
+              vip_id: 0      
+              auto_allocate_ip: "true"
+              auto_allocate_floating_ip: "{{ configure_dns_vs.allocate_public_ip }}"
+              avi_allocated_vip: true
+              avi_allocated_fip: "{{ configure_dns_vs.allocate_public_ip }}"
+              auto_allocate_ip_type: V4_ONLY
+              prefix_length: 32
+              ipam_network_subnet:
+                network_ref: "{{ dns_vs_subnet.obj.results.0.url }}"
+                subnet:
+                  ip_addr:
+                    addr: "{{ dns_vs_subnet.obj.results.0.ip_subnet.0.prefix.ip_addr.addr }}"
+                    type: "{{ dns_vs_subnet.obj.results.0.ip_subnet.0.prefix.ip_addr.type }}"
+                  mask: "{{ dns_vs_subnet.obj.results.0.ip_subnet.0.prefix.mask }}"
+            dns_info:
+            - type: DNS_RECORD_A
+              algorithm: DNS_RECORD_RESPONSE_CONSISTENT_HASH
+              fqdn: "dns.{{ configure_dns_profile.usable_domains.0 }}"
+            name: vsvip-DNS-VS-Default-Cloud
           register: vsvip_results
           until: vsvip_results is not failed
           retries: 30
           delay: 5
 
         - name: Create DNS Virtual Service
-          avi_api_session:
+          avi_virtualservice:
             avi_credentials: "{{ avi_credentials }}"
-            http_method: post
-            path: "virtualservice"
             tenant: "admin"
-            data:
-              name: DNS-VS
-              enabled: true
-              analytics_policy:
-                full_client_logs:
-                  enabled: true
-                  duration: 30
-                metrics_realtime_update:
-                  enabled: true
-                  duration: 30
-              traffic_enabled: true
-              application_profile_ref: /api/applicationprofile?name=System-DNS
-              network_profile_ref: /api/networkprofile?name=System-UDP-Per-Pkt
-              analytics_profile_ref: /api/analyticsprofile?name=System-Analytics-Profile
-              %{ if configure_gslb || create_gslb_se_group }
-              se_group_ref: "{{ gslb_se_group.obj.url }}"
-              %{ endif}
-              cloud_ref: "{{ avi_cloud.obj.url }}"
-              services:
-              - port: 53
-                port_range_end: 53
-              - port: 53
-                port_range_end: 53
-                override_network_profile_ref: /api/networkprofile/?name=System-TCP-Proxy
-              vsvip_ref: "{{ vsvip_results.obj.url }}"
+            name: DNS-VS
+            enabled: true
+            analytics_policy:
+              full_client_logs:
+                enabled: true
+                duration: 30
+              metrics_realtime_update:
+                enabled: true
+                duration: 30
+            traffic_enabled: true
+            application_profile_ref: /api/applicationprofile?name=System-DNS
+            network_profile_ref: /api/networkprofile?name=System-UDP-Per-Pkt
+            analytics_profile_ref: /api/analyticsprofile?name=System-Analytics-Profile
+%{ if configure_gslb.enabled || create_gslb_se_group ~}
+            se_group_ref: "{{ gslb_se_group.obj.url }}"
+%{ endif ~}
+            cloud_ref: "/api/cloud?name={{ cloud_name }}"
+            services:
+            - port: 53
+              port_range_end: 53
+            - port: 53
+              port_range_end: 53
+              override_network_profile_ref: /api/networkprofile/?name=System-TCP-Proxy
+            vsvip_ref: "{{ vsvip_results.obj.url }}"
           register: dns_vs
           until: dns_vs is not failed
           retries: 30
@@ -493,115 +470,60 @@
             path: cluster
           register: cluster
 
+        - name: Create Empty List for controller ip_addresses API field
+          set_fact:
+            controller_ip_addresses: []
+          
+        - name: Build list for gslb ip_addresses API field
+          set_fact:
+            controller_ip_addresses: "{{ controller_ip_addresses | default([]) + [{ 'type': 'V4','addr': ip }] }}"
+          loop: "{{ controller_ip }}"
+          loop_control:
+            loop_var: ip
+
+        - name: Create Empty List for dns_configs API field
+          set_fact:
+            gslb_domains: []
+          
+        - name: Build list for dns_configs API field
+          set_fact:
+            gslb_domains: "{{ gslb_domains | default([]) + [{ 'domain_name': domain }] }}"
+          loop: "{{ configure_gslb.domains }}"
+          loop_control:
+            loop_var: domain
+          ignore_errors: yes
+
         - name: Create GSLB Config
           avi_gslb:
             avi_credentials: "{{ avi_credentials }}"
             name: "GSLB"
             sites:
-              - name: "{{ gslb_site_name }}"
+              - name: "{{ configure_gslb.site_name }}"
                 username: "{{ gslb_user }}"
                 password: "{{ password }}"
-                ip_addresses:
-                  - type: "V4"
-                    addr: "{{ controller_ip[0] }}"
-%{ if controller_ha ~}
-                  - type: "V4"
-                    addr: "{{ controller_ip[1] }}"
-                  - type: "V4"
-                    addr: "{{ controller_ip[2] }}"
-%{ endif ~}
+                ip_addresses: "{{ controller_ip_addresses }}"
                 enabled: True
                 member_type: "GSLB_ACTIVE_MEMBER"
                 port: 443
                 dns_vses:
                   - dns_vs_uuid: "{{ dns_vs.obj.uuid }}"
                 cluster_uuid: "{{ cluster.obj.uuid }}"
-            dns_configs:
-%{ for domain in gslb_domains ~}
-              - domain_name: "${domain}"
-%{ endfor ~}
+            dns_configs: "{{ gslb_domains }}"
             leader_cluster_uuid: "{{ cluster.obj.uuid }}"
           register: gslb_results
-      when: configure_gslb == true
+      when: configure_gslb.enabled == true
       tags: configure_gslb
 
     - name: Configure Additional GSLB Sites
       block:
-%{ for site in additional_gslb_sites ~}
-        - name: GSLB Config | Verify Remote Site is Ready
-          avi_api_session:
-            controller: "${site.ip_address_list[0]}"
-            username: "{{ gslb_user }}"
-            password: "{{ password }}"
-            api_version: "{{ api_version }}"
-            http_method: get
-            path: virtualservice?name=DNS-VS
-          until: remote_site_check is not failed
-          retries: 30
-          delay: 10
-          register: remote_site_check
-
-        - name: GSLB Config | Verify DNS configuration
-          avi_api_session:
-            controller: "${site.ip_address_list[0]}"
-            username: "{{ gslb_user }}"
-            password: "{{ password }}"
-            api_version: "{{ api_version }}"
-            http_method: get
-            path: virtualservice?name=DNS-VS
-          until: dns_vs_verify is not failed
-          failed_when: dns_vs_verify.obj.count != 1
-          retries: 30
-          delay: 10
-          register: dns_vs_verify
-
-        - name: Display DNS VS Verify
-          ansible.builtin.debug:
-            var: dns_vs_verify
-
-        - name: GSLB Config | Verify GSLB site configuration
-          avi_api_session:
-            avi_credentials: "{{ avi_credentials }}"
-            http_method: post
-            path: gslbsiteops/verify
-            data:
-              name: name
-              username: "{{ gslb_user }}"
-              password: "{{ password }}"
-              port: 443
-              ip_addresses:
-                - type: "V4"
-                  addr: "${site.ip_address_list[0]}"
-          register: gslb_verify
-          
-        - name: Display GSLB Siteops Verify
-          ansible.builtin.debug:
-            var: gslb_verify
-
-        - name: Add GSLB Sites
-          avi_api_session:
-            avi_credentials: "{{ avi_credentials }}"
-            http_method: patch
-            path: "gslb/{{ gslb_results.obj.uuid }}"
-            tenant: "admin"
-            data:
-              add:
-                sites:
-                  - name: "${site.name}"
-                    member_type: "GSLB_ACTIVE_MEMBER"
-                    username: "{{ gslb_user }}"
-                    password: "{{ password }}"
-                    cluster_uuid: "{{ gslb_verify.obj.rx_uuid }}"
-                    ip_addresses:
-%{ for address in site.ip_address_list ~}
-                      - type: "V4"
-                        addr: "${address}"
-%{ endfor ~}
-                    dns_vses:
-                      - dns_vs_uuid: "{{ dns_vs_verify.obj.results.0.uuid }}"
-%{ endfor ~}
-      when: configure_gslb_additional_sites == true
+      - name: Include gslb-add-site-tasks.yml in play
+        include_tasks: gslb-add-site-tasks.yml
+        loop: "{{ configure_gslb.additional_sites }}"
+        loop_control:
+          loop_var: site
+      when: configure_gslb.additional_sites != "null"
       tags: configure_gslb_additional_sites
+      ignore_errors: yes
 
     - name: Controller Cluster Configuration
       avi_cluster:
@@ -626,8 +548,8 @@
               ip:
                 type: V4
                 addr: "{{ controller_ip[2] }}"
-%{ if configure_gslb || create_gslb_se_group ~}
-        name: "{{ name_prefix }}-{{ gslb_site_name }}-cluster"
+%{ if configure_gslb.enabled || create_gslb_se_group ~}
+        name: "{{ name_prefix }}-{{ configure_gslb.site_name }}-cluster"
 %{ else ~}
         name: "{{ name_prefix }}-cluster"
 %{ endif ~}
@@ -646,23 +568,23 @@
 
         - name: Copy Ansible module file
           ansible.builtin.copy:
-            src: /home/admin/avi_pulse_registration.py
+            src: /home/admin/ansible/avi_pulse_registration.py
             dest: /home/admin/.ansible/collections/ansible_collections/vmware/alb/plugins/modules/avi_pulse_registration.py
         
         - name: Remove unused module file
           ansible.builtin.file:
-            path: /home/admin/avi_pulse_registration.py
+            path: /home/admin/ansible/avi_pulse_registration.py
             state: absent
 
 %{ if split(".", avi_version)[0] == "21" && split(".", avi_version)[2] == "4"  ~}
         - name: Patch file
-          shell: patch --directory /opt/avi/python/bin/portal/api/ < /home/admin/views_albservices.patch
+          shell: patch --directory /opt/avi/python/bin/portal/api/ < /home/admin/ansible/views_albservices.patch
 %{ endif ~}
       tags: register_controller
 
     - name: Remove patch file
       ansible.builtin.file:
-        path: /home/admin/views_albservices.patch
+        path: /home/admin/ansible/views_albservices.patch
         state: absent
 
 %{ if avi_upgrade.enabled || register_controller.enabled  ~}

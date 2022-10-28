@@ -238,29 +238,14 @@ variable "configure_dns_vs" {
   default     = { enabled = "false", subnet_name = "", allocate_public_ip = "false" }
 }
 variable "configure_gslb" {
-  description = "Configure GSLB. The gslb_site_name, gslb_domains, and configure_dns_vs variables must also be set. Optionally the additional_gslb_sites variable can be used to add active GSLB sites"
-  type        = bool
-  default     = "false"
-}
-variable "gslb_site_name" {
-  description = "The name of the GSLB site the deployed Controller(s) will be a member of."
-  type        = string
-  default     = ""
-}
-variable "gslb_domains" {
-  description = "A list of GSLB domains that will be configured"
-  type        = list(string)
-  default     = [""]
-}
-variable "configure_gslb_additional_sites" {
-  description = "Configure additional GSLB Sites. The additional_gslb_sites, gslb_site_name, gslb_domains, and configure_dns_vs variables must also be set"
-  type        = bool
-  default     = "false"
-}
-variable "additional_gslb_sites" {
-  description = "The Names and IP addresses of the GSLB Sites that will be configured. If the Site is a controller cluster the ip_address_list should have the ip address of each controller. The configure_gslb_additional_sites variable must also be set to true for the sites to be added"
-  type        = list(object({ name = string, ip_address_list = list(string), dns_vs_name = string }))
-  default     = [{ name = "", ip_address_list = [""], dns_vs_name = "DNS-VS" }]
+  description = "Configures GSLB. The gslb_site_name parameter is the name of the GSLB site the deployed Controller(s) will be a member of. The gslb_domains parameter is a list of GSLB domains that will be configured. In addition to this variable the configure_dns_vs variable must also be set. Optionally the additional_gslb_sites parameter can be used to add additional active GSLB sites"
+  type = object({
+    enabled          = bool,
+    site_name        = string,
+    domains          = optional(list(string)),
+    additional_sites = optional(list(object({ name = string, ip_address_list = list(string) }))),
+  })
+  default = { enabled = "false", site_name = "", domains = [""] }
 }
 variable "create_gslb_se_group" {
   description = "Create a SE group for GSLB. The gslb_site_name variable must also be configured. This variable should be set to true for the follower GSLB sites. When configure_gslb is set to true a SE group will be created automatically"
