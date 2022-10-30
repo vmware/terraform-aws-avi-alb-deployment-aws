@@ -26,8 +26,6 @@ locals {
     configure_dns_profile     = var.configure_dns_profile
     configure_dns_vs          = var.configure_dns_vs
     configure_gslb            = var.configure_gslb
-    create_gslb_se_group      = var.create_gslb_se_group
-    gslb_se_instance_type     = var.gslb_se_instance_type
     se_ha_mode                = var.se_ha_mode
     se_instance_type          = var.se_instance_type
     se_ebs_encryption_key_arn = var.se_ebs_encryption ? var.se_ebs_encryption_key_arn == null ? data.aws_kms_alias.ebs[0].target_key_arn : var.se_ebs_encryption_key_arn : null

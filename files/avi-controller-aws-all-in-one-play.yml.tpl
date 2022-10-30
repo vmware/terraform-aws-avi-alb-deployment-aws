@@ -61,9 +61,7 @@
       ${ indent(6, yamlencode(configure_dns_vs))}
     configure_gslb:
       ${ indent(6, yamlencode(configure_gslb))}
-    create_gslb_se_group: ${create_gslb_se_group}
     gslb_user: "gslb-admin"
-    gslb_se_instance_type: ${gslb_se_instance_type}
 %{ if avi_upgrade.enabled || register_controller.enabled  ~}
     avi_upgrade:
       enabled: ${avi_upgrade.enabled}
@@ -146,6 +144,8 @@
       avi_cloud:
         avi_credentials: "{{ avi_credentials }}"
         state: present
+        avi_api_update_method: patch
+        avi_api_patch_op: replace
         name: "{{ cloud_name }}"
         vtype: CLOUD_AWS
         dhcp_enabled: true
@@ -299,15 +299,14 @@
           when: configure_dns_profile.type == "AVI"
         
         - name: Update Cloud Configuration with DNS profile 
-          avi_api_session:
+          avi_cloud:
             avi_credentials: "{{ avi_credentials }}"
-            http_method: patch
-            path: "cloud?name={{ cloud_name }}"
-            data:
-              add:
-                dns_provider_ref: "{{ create_dns_avi.obj.url }}"
+            avi_api_update_method: patch
+            avi_api_patch_op: add
+            name: "{{ cloud_name }}"
+            dns_provider_ref: "{{ create_dns_avi.obj.url }}"
+            vtype: CLOUD_AZURE
           when: configure_dns_profile.type == "AVI"
-          ignore_errors: yes
 
         - name: Create AWS Route53 DNS Profile
           avi_ipamdnsproviderprofile:
@@ -326,14 +325,14 @@
           register: create_dns_aws
           when: configure_dns_profile.type == "AWS" and route53_integration == false
 
-        - name: Update Cloud Configuration with DNS profile 
-          avi_api_session:
+        - name: Update Cloud Configuration with DNS profile
+          avi_cloud:
             avi_credentials: "{{ avi_credentials }}"
-            http_method: patch
-            path: "cloud?name={{ cloud_name }}"
-            data:
-              add:
-                dns_provider_ref: "{{ create_dns_aws.obj.url }}"
+            avi_api_update_method: patch
+            avi_api_patch_op: add
+            name: "{{ cloud_name }}"
+            dns_provider_ref: "{{ create_dns_aws.obj.url }}"
+            vtype: CLOUD_AZURE
           when: configure_dns_profile.type == "AWS" and route53_integration == false
       when: configure_dns_profile.enabled == true
       tags: dns_profile
@@ -354,12 +353,13 @@
             max_se: "4"
             max_vs_per_se: "1"
             extra_shared_config_memory: 2000
-            instance_flavor: "{{ gslb_se_instance_type }}"
+            instance_flavor: "{{ configure_gslb.se_size | default('c5.xlarge') }}"
             se_name_prefix: "{{ name_prefix }}{{ configure_gslb.site_name }}"
             realtime_se_metrics:
               duration: "60"
               enabled: true
           register: gslb_se_group
+          when: configure_gslb.create_se_group == true or configure_gslb.create_se_group == "null"
 
         - name: Create User for GSLB
           avi_user:
@@ -375,7 +375,7 @@
             is_superuser: false
             obj_password: "{{ password }}"
             obj_username: "{{ gslb_user }}"
-      when: configure_gslb.enabled == true or create_gslb_se_group == true
+      when: configure_gslb.enabled == true
       tags: gslb
 
     - name: Configure DNS Virtual Service
@@ -435,7 +435,7 @@
             application_profile_ref: /api/applicationprofile?name=System-DNS
             network_profile_ref: /api/networkprofile?name=System-UDP-Per-Pkt
             analytics_profile_ref: /api/analyticsprofile?name=System-Analytics-Profile
-%{ if configure_gslb.enabled || create_gslb_se_group ~}
+%{ if configure_gslb.enabled && configure_gslb.create_se_group ~}
             se_group_ref: "{{ gslb_se_group.obj.url }}"
 %{ endif ~}
             cloud_ref: "/api/cloud?name={{ cloud_name }}"
@@ -512,7 +512,7 @@
             leader_cluster_uuid: "{{ cluster.obj.uuid }}"
           register: gslb_results
       when: configure_gslb.enabled == true
-      tags: configure_gslb
+      tags: gslb
 
     - name: Configure Additional GSLB Sites
       block:
@@ -522,7 +522,9 @@
         loop_control:
           loop_var: site
       when: configure_gslb.additional_sites != "null"
-      tags: configure_gslb_additional_sites
+      tags:
+        - configure_gslb_additional_sites
+        - gslb
       ignore_errors: yes
 
     - name: Controller Cluster Configuration
@@ -548,7 +550,7 @@
               ip:
                 type: V4
                 addr: "{{ controller_ip[2] }}"
-%{ if configure_gslb.enabled || create_gslb_se_group ~}
+%{ if configure_gslb.enabled ~}
         name: "{{ name_prefix }}-{{ configure_gslb.site_name }}-cluster"
 %{ else ~}
         name: "{{ name_prefix }}-cluster"

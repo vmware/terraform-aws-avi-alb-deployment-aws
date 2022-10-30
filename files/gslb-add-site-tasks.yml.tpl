@@ -7,7 +7,7 @@
     http_method: get
     path: virtualservice?name=DNS-VS
   until: remote_site_check is not failed
-  retries: 30
+  retries: 60
   delay: 10
   register: remote_site_check
 

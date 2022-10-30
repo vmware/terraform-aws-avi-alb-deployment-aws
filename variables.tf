@@ -238,22 +238,15 @@ variable "configure_dns_vs" {
   default     = { enabled = "false", subnet_name = "", allocate_public_ip = "false" }
 }
 variable "configure_gslb" {
-  description = "Configures GSLB. The gslb_site_name parameter is the name of the GSLB site the deployed Controller(s) will be a member of. The gslb_domains parameter is a list of GSLB domains that will be configured. In addition to this variable the configure_dns_vs variable must also be set. Optionally the additional_gslb_sites parameter can be used to add additional active GSLB sites"
+  description = "Configures GSLB. In addition the configure_dns_vs variable must also be set for GSLB to be configured. See the GSLB Deployment README section for more information."
   type = object({
     enabled          = bool,
+    leader           = optional(bool),
     site_name        = string,
     domains          = optional(list(string)),
+    create_se_group  = optional(bool),
+    se_size          = optional(string),
     additional_sites = optional(list(object({ name = string, ip_address_list = list(string) }))),
   })
-  default = { enabled = "false", site_name = "", domains = [""] }
-}
-variable "create_gslb_se_group" {
-  description = "Create a SE group for GSLB. The site_name parameter of the configure_gslb variable must also be configured. This variable should be set to true for the follower GSLB sites. When configure_gslb is set to true a SE group will be created automatically"
-  type        = bool
-  default     = "false"
-}
-variable "gslb_se_instance_type" {
-  description = "The instance_type of the GSLB Service Engine group. The default is 2 vCPU, 8 GB RAM, and a 30 GB Disk per Service Engine. Syntax [\"cpu_cores\", \"memory_in_GB\", \"disk_size_in_GB\"]"
-  type        = string
-  default     = "c5.xlarge"
+  default = { enabled = "false", leader = "false", site_name = "", domains = [""], se_size = "c5.xlarge", create_se_group = "true" }
 }

@@ -23,17 +23,15 @@
     name_prefix: ${name_prefix}
     register_controller:
       ${ indent(6, yamlencode(register_controller))}
-%{ if configure_gslb.enabled || create_gslb_se_group ~}
     configure_gslb:
       ${ indent(6, yamlencode(configure_gslb))}
-%{ endif ~}
   tasks:
     - name: Cloud Services Registration
       vmware.alb.avi_pulse_registration:
         avi_credentials: "{{ avi_credentials }}"
         state: present
         jwt_token: "{{ register_controller.jwt_token }}"
-%{ if configure_gslb.enabled || create_gslb_se_group ~}
+%{ if configure_gslb.enabled ~}
         name: "{{ name_prefix }}-{{ configure_gslb.site_name }}-cluster"
         description: "{{ name_prefix }} {{ configure_gslb.site_name }} Cluster"
 %{ else ~}
