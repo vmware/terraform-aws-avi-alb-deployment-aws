@@ -471,6 +471,8 @@
           loop: "{{ controller_ip }}"
           loop_control:
             loop_var: ip
+            index_var: index
+          when: index < 3
           
         - name: Build list for dns_configs API field
           set_fact:
