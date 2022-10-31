@@ -102,7 +102,8 @@
       register: result
       until: result.status == 200
       retries: 300
-      delay: 10          
+      delay: 10
+         
     - name: Configure System Configurations
       avi_systemconfiguration:
         avi_credentials: "{{ avi_credentials }}"
