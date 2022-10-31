@@ -16,7 +16,7 @@ During the creation of the Controller instance the following initialization step
 The Ansible playbook can optionally add these configurations:
 * Create Avi DNS Profile (configured with the configure_dns_profile variable)
 * Create Avi DNS Virtual Service (configured with the configure_dns_vs variable)
-* Configure GSLB (configured with the configure_gslb, create_gslb_se_group, and gslb_se_instance_type variables)
+* Configure GSLB (configured with the configure_gslb variable)
 
 ## Usage
 This is an example of a controller deployment that leverages an existing VPC (with a cidr_block of 10.154.0.0/16) and 3 subnets. The public key is already created in EC2 and the private key found in the "/home/user/.ssh/id_rsa" will be used to copy and run the Ansible playbook to configure the Controller.
@@ -95,8 +95,7 @@ module "avi_controller_aws_west2" {
   se_ha_mode            = "active/active"
   configure_dns_profile = { enabled = "true", type = "AVI", usable_domains = ["west1.avidemo.net"] }
   configure_dns_vs      = { enabled = "true", allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
-  configure_gslb        = { enabled = "false", site_name = "West2"}
-  create_gslb_se_group  = "true"
+  configure_gslb        = { enabled = "true", site_name = "West2"}
 }
 module "avi_controller_aws_east1" {
   source                = "vmware/avi-alb-deployment-aws/aws"
@@ -119,7 +118,7 @@ module "avi_controller_aws_east1" {
   se_ha_mode            = "active/active"
   configure_dns_profile = { enabled = "true", type = "AVI", usable_domains = ["east1.avidemo.net"] }
   configure_dns_vs      = { enabled = "true", allocate_public_ip = "true", subnet_name = "companyname-avi-subnet" }
-  configure_gslb        = { enabled = "true", site_name = "East1", domains = ["gslb.avidemo.net"], additional_sites = [{name = "West2", ip_address_list = module.avi_controller_aws_west2.controllers[*].private_ip_address}] }
+  configure_gslb        = { enabled = "true", leader = "true", site_name = "East1", domains = ["gslb.avidemo.net"], additional_sites = [{name = "West2", ip_address_list = module.avi_controller_aws_west2.controllers[*].private_ip_address}] }
 }
 output "east1_controller_info" {
   value = module.avi_controller_aws_east1.controllers
