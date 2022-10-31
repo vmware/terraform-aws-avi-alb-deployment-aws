@@ -47,10 +47,6 @@
 - name: Display GSLB Siteops Verify
   ansible.builtin.debug:
     var: gslb_verify
-
-- name: Create Empty List for gslb ip_addresses API field
-  set_fact:
-    gslb_ip_addresses: []
     
 - name: Build list for gslb ip_addresses API field
   set_fact:

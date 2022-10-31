@@ -272,12 +272,6 @@
 %{ endif ~}
     - name: Configure DNS Profile
       block:
-        - name: Create Empty List for dns_service_domain API field
-          set_fact:
-            dns_service_domain: []
-          when: configure_dns_profile.type == "AVI"
-          
-
         - name: Build list for dns_service_domain API field
           set_fact:
             dns_service_domain: "{{ dns_service_domain | default([]) + [{'domain_name': domain, 'pass_through': 'true' }] }}"
@@ -470,10 +464,6 @@
             http_method: get
             path: cluster
           register: cluster
-
-        - name: Create Empty List for controller ip_addresses API field
-          set_fact:
-            controller_ip_addresses: []
           
         - name: Build list for gslb ip_addresses API field
           set_fact:
@@ -481,10 +471,6 @@
           loop: "{{ controller_ip }}"
           loop_control:
             loop_var: ip
-
-        - name: Create Empty List for dns_configs API field
-          set_fact:
-            gslb_domains: []
           
         - name: Build list for dns_configs API field
           set_fact:
