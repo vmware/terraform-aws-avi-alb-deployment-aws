@@ -435,7 +435,7 @@
             application_profile_ref: /api/applicationprofile?name=System-DNS
             network_profile_ref: /api/networkprofile?name=System-UDP-Per-Pkt
             analytics_profile_ref: /api/analyticsprofile?name=System-Analytics-Profile
-%{ if configure_gslb.enabled && configure_gslb.create_se_group ~}
+%{ if configure_gslb.enabled && configure_gslb.create_se_group  ~}
             se_group_ref: "{{ gslb_se_group.obj.url }}"
 %{ endif ~}
             cloud_ref: "/api/cloud?name={{ cloud_name }}"
@@ -511,7 +511,7 @@
             dns_configs: "{{ gslb_domains }}"
             leader_cluster_uuid: "{{ cluster.obj.uuid }}"
           register: gslb_results
-      when: configure_gslb.enabled == true
+      when: configure_gslb.enabled == true and configure_gslb.leader == true
       tags: gslb
 
     - name: Configure Additional GSLB Sites

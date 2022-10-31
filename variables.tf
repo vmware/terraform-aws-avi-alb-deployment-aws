@@ -216,12 +216,12 @@ variable "configure_dns_profile" {
   description = "Configure a DNS Profile for DNS Record Creation for Virtual Services. The usable_domains is a list of domains that Avi will be the Authoritative Nameserver for and NS records may need to be created pointing to the Avi Service Engine addresses. Supported profiles for the type parameter are AWS or AVI. The AWS DNS Profile is only needed when the AWS Account used for Route53 is different than the Avi Controller and the configure_dns_route_53 variable can be used otherwise"
   type = object({
     enabled        = bool,
-    type           = string,
+    type           = optional(string, "AVI"),
     usable_domains = list(string),
-    ttl            = optional(string),
+    ttl            = optional(string, "30"),
     aws_profile    = optional(object({ iam_assume_role = string, region = string, vpc_id = string, access_key_id = string, secret_access_key = string }))
   })
-  default = { enabled = false, type = "AVI", usable_domains = [], ttl = "30" }
+  default = { enabled = false, type = "AVI", usable_domains = [] }
   validation {
     condition     = contains(["AWS", "AVI"], var.configure_dns_profile.type)
     error_message = "Supported DNS Profile types are 'AWS' or 'AVI'"
@@ -241,12 +241,12 @@ variable "configure_gslb" {
   description = "Configures GSLB. In addition the configure_dns_vs variable must also be set for GSLB to be configured. See the GSLB Deployment README section for more information."
   type = object({
     enabled          = bool,
-    leader           = optional(bool),
+    leader           = optional(bool, false),
     site_name        = string,
     domains          = optional(list(string)),
-    create_se_group  = optional(bool),
-    se_size          = optional(string),
+    create_se_group  = optional(bool, true),
+    se_size          = optional(string, "c5.xlarge"),
     additional_sites = optional(list(object({ name = string, ip_address_list = list(string) }))),
   })
-  default = { enabled = "false", leader = "false", site_name = "", domains = [""], se_size = "c5.xlarge", create_se_group = "true" }
+  default = { enabled = "false", site_name = "", domains = [""] }
 }
