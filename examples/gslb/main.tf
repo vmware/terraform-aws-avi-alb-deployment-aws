@@ -28,7 +28,6 @@ module "avi_controller_aws_west2" {
   configure_dns_profile     = { enabled = "true", type = "AVI", usable_domains = ["west2.avidemo.net"] }
   configure_dns_vs          = var.configure_dns_vs_west
   configure_gslb            = { enabled = "false", site_name = "West2" }
-  create_gslb_se_group      = "true"
 }
 module "avi_controller_aws_east2" {
   source = "../.."
@@ -50,5 +49,5 @@ module "avi_controller_aws_east2" {
   name_prefix               = var.name_prefix_east
   configure_dns_profile     = { enabled = "true", type = "AVI", usable_domains = ["east2.avidemo.net"] }
   configure_dns_vs          = var.configure_dns_vs_east
-  configure_gslb            = { enabled = "true", site_name = "East2", domains = ["gslb.avidemo.net"], additional_sites = [{ name = "West2", ip_address_list = module.avi_controller_aws_west2.controllers[*].private_ip_address }] }
+  configure_gslb            = { enabled = "true", leader = "true", site_name = "East2", domains = ["gslb.avidemo.net"], additional_sites = [{ name = "West2", ip_address_list = module.avi_controller_aws_west2.controllers[*].private_ip_address }] }
 }
