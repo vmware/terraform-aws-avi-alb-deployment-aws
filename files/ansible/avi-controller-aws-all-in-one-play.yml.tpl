@@ -300,7 +300,7 @@
             avi_api_patch_op: add
             name: "{{ cloud_name }}"
             dns_provider_ref: "{{ create_dns_avi.obj.url }}"
-            vtype: CLOUD_AZURE
+            vtype: CLOUD_AWS
           when: configure_dns_profile.type == "AVI"
 
         - name: Create AWS Route53 DNS Profile
@@ -327,7 +327,7 @@
             avi_api_patch_op: add
             name: "{{ cloud_name }}"
             dns_provider_ref: "{{ create_dns_aws.obj.url }}"
-            vtype: CLOUD_AZURE
+            vtype: CLOUD_AWS
           when: configure_dns_profile.type == "AWS" and route53_integration == false
       when: configure_dns_profile.enabled == true
       tags: dns_profile
