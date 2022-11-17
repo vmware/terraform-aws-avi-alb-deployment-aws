@@ -572,6 +572,7 @@
           shell: patch --directory /opt/avi/python/bin/portal/api/ < /home/admin/ansible/views_albservices.patch
 %{ endif ~}
       tags: register_controller
+      ignore_errors: true
 
     - name: Remove patch file
       ansible.builtin.file:
