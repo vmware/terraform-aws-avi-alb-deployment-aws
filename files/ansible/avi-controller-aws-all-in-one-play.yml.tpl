@@ -578,7 +578,6 @@
         path: /home/admin/ansible/views_albservices.patch
         state: absent
 
-%{ if avi_upgrade.enabled || register_controller.enabled  ~}
     - name: Verify Cluster State if avi_upgrade or register_controller plays will be ran
       block:
         - name: Pause for 7 minutes for Cluster to form
@@ -604,7 +603,6 @@
           retries: 60
           delay: 10
           register: cluster_runtime
-      when: (controller_ha == true and avi_upgrade.enabled == true) or
-            (controller_ha == true and register_controller.enabled == true)
+      when: (controller_ha == true)
       tags: verify_cluster
-%{ endif ~}
+
