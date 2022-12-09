@@ -25,6 +25,9 @@ terraform {
   backend "local" {
   }
 }
+provider "aws" {
+  region = "us-west-1"
+}
 module "avi_controller_aws" {
   source  = "vmware/avi-alb-deployment-aws/aws"
   version = "1.0.x"
