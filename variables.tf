@@ -95,12 +95,17 @@ variable "avi_cidr_block" {
   default     = "10.255.0.0/16"
 }
 variable "custom_vpc_id" {
-  description = "This field can be used to specify an existing VPC for the controller and SEs. The create-networking variable must also be set to false for this network to be used."
+  description = "This field can be used to specify an existing VPC for the SEs. The create-networking variable must also be set to false for this network to be used."
   type        = string
   default     = null
 }
 variable "custom_subnet_ids" {
-  description = "This field can be used to specify a list of existing VPC Subnets for the controller and SEs. The create-networking variable must also be set to false for this network to be used."
+  description = "This field can be used to specify a list of existing VPC Subnets for the SEs. The create-networking variable must also be set to false for this network to be used."
+  type        = list(string)
+  default     = null
+}
+variable "custom_controller_subnet_ids" {
+  description = "This field can be used to specify a list of existing VPC Subnets for the Controllers.  The create-networking variable must also be set to false for this network to be used."
   type        = list(string)
   default     = null
 }

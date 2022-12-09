@@ -300,7 +300,7 @@
             avi_api_patch_op: add
             name: "{{ cloud_name }}"
             dns_provider_ref: "{{ create_dns_avi.obj.url }}"
-            vtype: CLOUD_AZURE
+            vtype: CLOUD_AWS
           when: configure_dns_profile.type == "AVI"
 
         - name: Create AWS Route53 DNS Profile
@@ -327,7 +327,7 @@
             avi_api_patch_op: add
             name: "{{ cloud_name }}"
             dns_provider_ref: "{{ create_dns_aws.obj.url }}"
-            vtype: CLOUD_AZURE
+            vtype: CLOUD_AWS
           when: configure_dns_profile.type == "AWS" and route53_integration == false
       when: configure_dns_profile.enabled == true
       tags: dns_profile
@@ -572,13 +572,13 @@
           shell: patch --directory /opt/avi/python/bin/portal/api/ < /home/admin/ansible/views_albservices.patch
 %{ endif ~}
       tags: register_controller
+      ignore_errors: true
 
     - name: Remove patch file
       ansible.builtin.file:
         path: /home/admin/ansible/views_albservices.patch
         state: absent
 
-%{ if avi_upgrade.enabled || register_controller.enabled  ~}
     - name: Verify Cluster State if avi_upgrade or register_controller plays will be ran
       block:
         - name: Pause for 7 minutes for Cluster to form
@@ -604,7 +604,6 @@
           retries: 60
           delay: 10
           register: cluster_runtime
-      when: (controller_ha == true and avi_upgrade.enabled == true) or
-            (controller_ha == true and register_controller.enabled == true)
+      when: (controller_ha == true)
       tags: verify_cluster
-%{ endif ~}
+
