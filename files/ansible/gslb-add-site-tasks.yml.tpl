@@ -48,12 +48,9 @@
   ansible.builtin.debug:
     var: gslb_verify
 
-- name: Build list for gslb ip_addresses API field
+- name: Create Empty List for gslb ip_addresses API field
   set_fact:
-    gslb_ip_addresses: "{{ gslb_ip_addresses | default([]) + [{ 'type': 'V4','addr': ip }] }}"
-  loop: "{{ site.ip_address_list }}"
-  loop_control:
-    loop_var: ip
+    gslb_ip_addresses: []
     
 - name: Build list for gslb ip_addresses API field
   set_fact:
