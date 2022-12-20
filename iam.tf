@@ -7,6 +7,11 @@ resource "aws_iam_role" "vmimport" {
   assume_role_policy = file("${path.module}/files/iam/vmimport-role-trust.json")
 
   tags = var.custom_tags
+  lifecycle {
+    ignore_changes = [
+      permissions_boundary
+    ]
+  }
 }
 resource "aws_iam_role" "avi" {
   count              = var.create_iam ? 1 : 0
@@ -14,6 +19,11 @@ resource "aws_iam_role" "avi" {
   assume_role_policy = file("${path.module}/files/iam/avicontroller-role-trust.json")
 
   tags = var.custom_tags
+  lifecycle {
+    ignore_changes = [
+      permissions_boundary
+    ]
+  }
 }
 resource "aws_iam_instance_profile" "avi" {
   count = var.create_iam ? 1 : 0
