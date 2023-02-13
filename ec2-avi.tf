@@ -48,7 +48,8 @@ locals {
       "mgmt_network_name" = subnet.tags["Name"]
     }
   }
-  az_names = data.aws_availability_zones.azs.names
+  az_names               = data.aws_availability_zones.azs.names
+  check_for_aws_iam_role = var.create_iam ? length(data.aws_iam_roles.vmimport[0].names) : null
 }
 
 #tfsec:ignore:aws-ec2-enforce-http-token-imds
