@@ -31,6 +31,7 @@ locals {
     se_ebs_encryption_key_arn = var.se_ebs_encryption ? var.se_ebs_encryption_key_arn == null ? data.aws_kms_alias.ebs[0].target_key_arn : var.se_ebs_encryption_key_arn : null
     se_s3_encryption_key_arn  = var.se_ebs_encryption ? var.se_s3_encryption_key_arn == null ? data.aws_kms_alias.s3[0].target_key_arn : var.se_s3_encryption_key_arn : null
     avi_upgrade               = var.avi_upgrade
+    license_tier              = var.license_tier
   }
   controller_names = aws_instance.avi_controller[*].tags.Name
   controller_ip    = aws_instance.avi_controller[*].private_ip

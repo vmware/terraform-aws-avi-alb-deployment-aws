@@ -17,6 +17,7 @@
     password: "{{ password }}"
     api_version: ${avi_version}
     cloud_name: "Default-Cloud"
+    license_tier: ${license_tier}
     controller_ip:
       ${ indent(6, yamlencode(controller_ip))}
     controller_names:
@@ -108,6 +109,7 @@
       avi_systemconfiguration:
         avi_credentials: "{{ avi_credentials }}"
         state: present
+        default_license_tier: "{{ license_tier }}"
         email_configuration:
           smtp_type: "SMTP_LOCAL_HOST"
           from_email: admin@avicontroller.net

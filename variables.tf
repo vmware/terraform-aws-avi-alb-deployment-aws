@@ -5,6 +5,15 @@ variable "region" {
   description = "The Region that the AVI controller and SEs will be deployed to"
   type        = string
 }
+variable "license_tier" {
+  description = "The license tier to use for Avi. Possible values are ENTERPRISE_WITH_CLOUD_SERVICES or ENTERPRISE"
+  type        = string
+  default     = "ENTERPRISE_WITH_CLOUD_SERVICES"
+  validation {
+    condition     = var.license_tier == "ENTERPRISE_WITH_CLOUD_SERVICES" || var.license_tier == "ENTERPRISE"
+    error_message = "The license_tier variable must be ENTERPRISE_WITH_CLOUD_SERVICES or ENTERPRISE."
+  }
+}
 variable "aws_access_key" {
   description = "The Access Key that will be used to deploy AWS resources"
   type        = string
