@@ -55,7 +55,7 @@ locals {
 #tfsec:ignore:aws-ec2-enforce-http-token-imds
 resource "aws_instance" "avi_controller" {
   count = var.controller_ha ? 3 : 1
-  ami   = data.aws_ami.avi.id
+  ami   = var.custom_ami == null ? data.aws_ami.avi.id : var.custom_ami
   root_block_device {
     volume_size           = var.boot_disk_size
     delete_on_termination = true
@@ -97,7 +97,7 @@ resource "null_resource" "changepassword_provisioner" {
   count = var.controller_ha ? 3 : 1
   # Changes to any instance of the cluster requires re-provisioning
   triggers = {
-    controller_instance_ids = join(",", aws_instance.avi_controller.*.id)
+    controller_instance_ids = join(",", aws_instance.avi_controller[*].id)
   }
   lifecycle {
     precondition {
@@ -124,7 +124,7 @@ resource "null_resource" "changepassword_provisioner" {
 resource "null_resource" "ansible_provisioner" {
   # Changes to any instance of the cluster requires re-provisioning
   triggers = {
-    controller_instance_ids = join(",", aws_instance.avi_controller.*.id)
+    controller_instance_ids = join(",", aws_instance.avi_controller[*].id)
   }
   depends_on = [null_resource.changepassword_provisioner]
   lifecycle {
@@ -176,16 +176,19 @@ resource "null_resource" "ansible_provisioner" {
   provisioner "remote-exec" {
     inline = var.configure_controller ? var.create_iam ? [
       "sleep 30",
+      "export ANSIBLE_COLLECTIONS_PATHS=/etc/ansible/collections:/home/admin/.ansible/collections:/usr/share/ansible/collections",
       "cd ansible",
       "ansible-playbook avi-controller-aws-all-in-one-play.yml -e password=${var.controller_password} 2> ansible-error.log | tee ansible-playbook.log",
       "echo Controller Configuration Completed"
       ] : [
       "sleep 30",
+      "export ANSIBLE_COLLECTIONS_PATHS=/etc/ansible/collections:/home/admin/.ansible/collections:/usr/share/ansible/collections",
       "cd ansible",
       "ansible-playbook avi-controller-aws-all-in-one-play.yml -e password=${var.controller_password} -e aws_access_key_id=${var.aws_access_key} -e aws_secret_access_key=${var.aws_secret_key} 2> ansible-error.log | tee ansible-playbook.log",
       "echo Controller Configuration Completed"
       ] : [
       "sleep 30",
+      "export ANSIBLE_COLLECTIONS_PATHS=/etc/ansible/collections:/home/admin/.ansible/collections:/usr/share/ansible/collections",
       "cd ansible",
       "ansible-playbook avi-controller-aws-all-in-one-play.yml -e password=${var.controller_password} --tags register_controller 2> ansible-error.log | tee ansible-playbook.log",
       "echo Controller Configuration Completed"

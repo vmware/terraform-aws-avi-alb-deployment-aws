@@ -5,8 +5,8 @@
   hosts: localhost
   connection: local
   gather_facts: no
-  roles:
-    - role: avinetworks.avisdk
+  collections:
+    - vmware.alb
   vars:
     avi_credentials:
         controller: "{{ controller_ip[0] }}"
@@ -310,7 +310,7 @@
             name: "AWS_R53_DNS"
             type: "IPAMDNS_TYPE_AWS_DNS"
             aws_profile:
-              iam_assume_role: "{{ configure_dns_profile.aws_profile.iam_assume_role }}"
+              iam_assume_role: "{{ configure_dns_profile.aws_profile.iam_assume_role | default(omit) }}"
               access_key_id: "{{ configure_dns_profile.aws_profile.access_key_id }}"
               secret_access_key: "{{ configure_dns_profile.aws_profile.secret_access_key }}"
               region: "{{ configure_dns_profile.aws_profile.region }}"
