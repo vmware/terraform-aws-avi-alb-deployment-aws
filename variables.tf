@@ -47,6 +47,11 @@ variable "avi_version" {
   description = "The AVI Controller version that will be deployed"
   type        = string
 }
+variable "custom_ami" {
+  description = "The AMI ID of a custom controller AMI.  For internal use."
+  type        = string
+  default     = null
+}
 variable "avi_upgrade" {
   description = "This variable determines if a patch upgrade is performed after install. The enabled key should be set to true and the url from the Avi Cloud Services portal for the should be set for the upgrade_file_uri key. Valid upgrade_type values are patch or system"
   sensitive   = false
