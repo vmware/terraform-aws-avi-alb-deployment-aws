@@ -18,6 +18,7 @@
     api_version: ${avi_version}
     cloud_name: "Default-Cloud"
     license_tier: ${license_tier}
+    license_key: ${license_key}
     controller_ip:
       ${ indent(6, yamlencode(controller_ip))}
     controller_names:
@@ -142,6 +143,25 @@
       retries: 30
       delay: 5
       register: sysconfig
+
+    - name: Apply Avi License for ENTERPRISE Tier
+      avi_api_session:
+        avi_credentials: "{{ avi_credentials }}"
+        http_method: put
+        path: "licensing"
+        data:
+          serial_key: "{{ license_key }}"
+      when: license_tier == "ENTERPRISE" and license_key != ""
+      register: license
+      ignore_errors: yes
+
+    - name: Delete Trial Avi License when license is added successfully
+      avi_api_session:
+        avi_credentials: "{{ avi_credentials }}"
+        http_method: delete
+        path: "licensing/Eval"
+      when: license_tier == "ENTERPRISE" and license_key != "" and license.failed != true
+      ignore_errors: yes
 
     - name: Configure Cloud
       avi_cloud:
