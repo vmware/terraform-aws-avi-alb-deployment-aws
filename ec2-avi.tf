@@ -33,6 +33,9 @@ locals {
     avi_upgrade               = var.avi_upgrade
     license_tier              = var.license_tier
     license_key               = var.license_key
+    portal_certificate        = var.portal_certificate
+    securechannel_certificate = var.securechannel_certificate
+    ca_certificates           = var.ca_certificates
   }
   controller_names = aws_instance.avi_controller[*].tags.Name
   controller_ip    = aws_instance.avi_controller[*].private_ip
