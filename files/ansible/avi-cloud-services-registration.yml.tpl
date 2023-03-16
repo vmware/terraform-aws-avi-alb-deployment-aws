@@ -15,6 +15,16 @@
         api_version: "{{ api_version }}"
     controller_ip:
       ${ indent(6, yamlencode(controller_ip))}
+    playbooks:
+      - "/home/admin/ansible/avi-cloud-services-registration.yml"
+      - "/home/admin/ansible/avi-cleanup.yml"
+%{ if configure_gslb.enabled ~}
+    controller_name: "{{ name_prefix }}-{{ configure_gslb.site_name }}-cluster"
+    controller_description: "{{ name_prefix }} {{ configure_gslb.site_name }} Cluster"
+%{ else ~}
+    controller_name: "{{ name_prefix }}-cluster"
+    controller_description: "{{ name_prefix }} Cluster"
+%{ endif ~}
     username: "admin"
     password: "{{ password }}"
     api_version: ${avi_version}
@@ -31,13 +41,8 @@
         avi_credentials: "{{ avi_credentials }}"
         state: present
         jwt_token: "{{ register_controller.jwt_token }}"
-%{ if configure_gslb.enabled ~}
-        name: "{{ name_prefix }}-{{ configure_gslb.site_name }}-cluster"
-        description: "{{ name_prefix }} {{ configure_gslb.site_name }} Cluster"
-%{ else ~}
-        name: "{{ name_prefix }}-cluster"
-        description: "{{ name_prefix }} Cluster"
-%{ endif ~}
+        name: "{{ register_controller.name | default(controller_name) }}"
+        description: "{{ register_controller.description | default(controller_description) }}"
         email: "{{ register_controller.email }}"
         account_id: "{{ register_controller.organization_id }}"
         optins: present
@@ -56,3 +61,19 @@
       retries: 10
       delay: 10
       register: register_controller
+
+    - name: Delete Trial Avi License when Controller is registered successfully
+      avi_api_session:
+        avi_credentials: "{{ avi_credentials }}"
+        http_method: delete
+        path: "licensing/Eval"
+      when: register_controller is not failed
+      ignore_errors: yes
+    
+    - name: Clear JWT Token Variable
+      ansible.builtin.replace:
+        path: "{{ item }}"
+        regexp: '^(\s*)(\"jwt_token\":\s+)(.*)$'
+        replace: '\1\2""'
+      when: register_controller.jwt_token != ""
+      loop: "{{ playbooks }}"
