@@ -338,3 +338,13 @@ variable "configure_gslb" {
   })
   default = { enabled = "false", site_name = "", domains = [""] }
 }
+variable "s3_backup_bucket" {
+  description = "Name of the S3 bucket for Controller configuration backups"
+  type        = string
+  default     = null
+}
+variable "s3_backup_retention" {
+  description = "Number of days to keep backups in S3 bucket"
+  type        = number
+  default     = 4
+}
