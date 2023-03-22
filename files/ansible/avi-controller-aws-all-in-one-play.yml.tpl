@@ -287,6 +287,7 @@
         aws_bucket_id: "{{ s3_backup_bucket }}"
         aws_bucket_region: "{{ aws_region }}"
         backup_passphrase: "{{ password }}"
+        upload_to_remote_host: false
 %{ else ~}
     - name: Set Backup Passphrase
       avi_backupconfiguration:
