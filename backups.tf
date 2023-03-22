@@ -1,8 +1,5 @@
 resource "aws_s3_bucket" "s3_nsxalb_backups" {
   bucket = var.s3_backup_bucket
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "aws_s3_bucket_public_access_block" "s3_nsxalb_backups" {
@@ -34,9 +31,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "s3_nsxalb_backups" {
       noncurrent_days = 1
     }
     status = "Enabled"
-  }
-  lifecycle {
-    prevent_destroy = true
   }
 }
 
