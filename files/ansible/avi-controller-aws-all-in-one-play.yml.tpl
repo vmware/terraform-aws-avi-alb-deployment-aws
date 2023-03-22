@@ -35,6 +35,7 @@
     aws_vpc_id: ${vpc_id}
     aws_region: ${aws_region}
     name_prefix: ${name_prefix}
+    s3_backup_bucket: ${s3_backup_bucket}
     se_ha_mode: ${se_ha_mode}
     se_instance_type: ${se_instance_type}
 %{ if se_ebs_encryption_key_arn != null ~}
@@ -276,6 +277,18 @@
       register: avi_cloud
       ignore_errors: yes
 
+%{ if s3_backup_bucket != null ~}
+    - name: Set AWS S3 Backup Configuration
+      avi_backupconfiguration:
+        avi_credentials: "{{ avi_credentials }}"
+        state: present
+        name: Backup-Configuration
+        upload_to_s3: true
+        aws_bucket_id: "{{ s3_backup_bucket }}"
+        aws_bucket_region: "{{ aws_region }}"
+        backup_passphrase: "{{ password }}"
+        upload_to_remote_host: false
+%{ else ~}
     - name: Set Backup Passphrase
       avi_backupconfiguration:
         avi_credentials: "{{ avi_credentials }}"
@@ -283,6 +296,7 @@
         name: Backup-Configuration
         backup_passphrase: "{{ password }}"
         upload_to_remote_host: false
+%{ endif ~}
 
 %{ if se_ha_mode == "active/active" ~}
     - name: Configure SE-Group

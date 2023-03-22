@@ -36,6 +36,7 @@ locals {
     portal_certificate        = var.portal_certificate
     securechannel_certificate = var.securechannel_certificate
     ca_certificates           = var.ca_certificates
+    s3_backup_bucket          = aws_s3_bucket.s3_nsxalb_backups.id
   }
   controller_names = aws_instance.avi_controller[*].tags.Name
   controller_ip    = aws_instance.avi_controller[*].private_ip
