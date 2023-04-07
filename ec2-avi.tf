@@ -58,7 +58,6 @@ locals {
   check_for_aws_iam_role = var.create_iam ? length(data.aws_iam_roles.vmimport[0].names) : null
 }
 
-#tfsec:ignore:aws-ec2-enforce-http-token-imds
 resource "aws_instance" "avi_controller" {
   count = var.controller_ha ? 3 : 1
   ami   = var.custom_ami == null ? data.aws_ami.avi.id : var.custom_ami
@@ -77,10 +76,14 @@ resource "aws_instance" "avi_controller" {
   tags = {
     Name = (var.custom_controller_name != null) ? "${var.custom_controller_name}-${count.index + 1}" : "${var.name_prefix}-avi-controller-${count.index + 1}"
   }
+  metadata_options {
+    http_tokens = var.avi_version == "22.1.3" ? "required" : "optional"
+  }
   lifecycle {
     ignore_changes = [tags, associate_public_ip_address, root_block_device[0].tags]
   }
 }
+
 resource "aws_ec2_tag" "custom_controller_1" {
   for_each    = var.custom_tags
   resource_id = aws_instance.avi_controller[0].id
