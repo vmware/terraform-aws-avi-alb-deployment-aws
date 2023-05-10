@@ -53,8 +53,16 @@ locals {
       "mgmt_network_name" = subnet.tags["Name"]
     }
   }
-  az_names               = data.aws_availability_zones.azs.names
-  check_for_aws_iam_role = var.create_iam ? length(data.aws_iam_roles.vmimport[0].names) : null
+  az_names = data.aws_availability_zones.azs.names
+  tags = merge(
+    var.custom_tags,
+    {
+      terraform_module = "vmware/avi-alb-deployment-aws/aws"
+    },
+  )
+  check_for_vmimport_iam_role = var.create_iam ? length(data.aws_iam_roles.vmimport[0].names) : null
+  check_vmimport_tag_key      = can(data.aws_iam_role.vmimport[0].tags["terraform_module"])
+  check_vmimport_tags         = var.create_iam && length(data.aws_iam_roles.vmimport[0].names) == 1 && local.check_vmimport_tag_key ? data.aws_iam_role.vmimport[0].tags["terraform_module"] == "vmware/avi-alb-deployment-aws/aws" ? 1 : null : null
 }
 
 #tfsec:ignore:aws-ec2-enforce-http-token-imds
