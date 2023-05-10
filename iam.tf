@@ -2,11 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 resource "aws_iam_role" "vmimport" {
-  count              = var.create_iam && local.check_for_aws_iam_role != 1 ? 1 : 0
+  count              = var.create_iam ? (local.check_for_vmimport_iam_role != 1 || local.check_vmimport_tags == 1) ? 1 : 0 : 0
   name               = "vmimport"
   assume_role_policy = file("${path.module}/files/iam/vmimport-role-trust.json")
 
-  tags = var.custom_tags
+  tags = local.tags
   lifecycle {
     ignore_changes = [
       permissions_boundary
@@ -31,14 +31,14 @@ resource "aws_iam_instance_profile" "avi" {
   role  = aws_iam_role.avi[0].id
 }
 resource "aws_iam_role_policy" "avi_vmimport_policy" {
-  count = var.create_iam && local.check_for_aws_iam_role != 1 ? 1 : 0
+  count = var.create_iam ? (local.check_for_vmimport_iam_role != 1 || local.check_vmimport_tags == 1) ? 1 : 0 : 0
   name  = "${var.name_prefix}-avi-vmimport-policy"
   role  = aws_iam_role.vmimport[0].id
 
   policy = templatefile("${path.module}/files/iam/vmimport-role-policy.json.tpl", { awsPartition = data.aws_partition.current.partition })
 }
 resource "aws_iam_role_policy" "avi_vmimport_kms_policy" {
-  count = var.create_iam && local.check_for_aws_iam_role != 1 ? 1 : 0
+  count = var.create_iam ? (local.check_for_vmimport_iam_role != 1 || local.check_vmimport_tags == 1) ? 1 : 0 : 0
   name  = "${var.name_prefix}-avicontroller-kms-vmimport-policy"
   role  = aws_iam_role.vmimport[0].id
 

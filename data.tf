@@ -21,6 +21,10 @@ data "aws_iam_roles" "vmimport" {
   count      = var.create_iam ? 1 : 0
   name_regex = "^vmimport$"
 }
+data "aws_iam_role" "vmimport" {
+  count = var.create_iam ? length(data.aws_iam_roles.vmimport[0].names) : 0
+  name  = "vmimport"
+}
 data "aws_kms_alias" "s3" {
   count = var.se_s3_encryption ? 1 : 0
   name  = "alias/aws/s3"
