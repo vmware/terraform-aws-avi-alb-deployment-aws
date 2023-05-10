@@ -214,6 +214,7 @@ resource "null_resource" "ansible_provisioner" {
   provisioner "remote-exec" {
     inline = var.register_controller["enabled"] ? [
       "cd ansible",
+      "export ANSIBLE_COLLECTIONS_PATHS=/etc/ansible/collections:/home/admin/.ansible/collections:/usr/share/ansible/collections",
       "ansible-playbook avi-cloud-services-registration.yml -e password=${var.controller_password} 2>> ansible-error.log | tee -a ansible-playbook.log",
       "echo Controller Registration Completed"
     ] : ["echo Controller Registration Skipped"]
@@ -221,6 +222,7 @@ resource "null_resource" "ansible_provisioner" {
   provisioner "remote-exec" {
     inline = var.avi_upgrade["enabled"] ? [
       "cd ansible",
+      "export ANSIBLE_COLLECTIONS_PATHS=/etc/ansible/collections:/home/admin/.ansible/collections:/usr/share/ansible/collections",
       "ansible-playbook avi-upgrade.yml -e password=${var.controller_password} -e upgrade_type=${var.avi_upgrade["upgrade_type"]} 2>> ansible-error.log | tee -a ansible-playbook.log",
       "echo Avi upgrade completed"
     ] : ["echo Avi upgrade skipped"]

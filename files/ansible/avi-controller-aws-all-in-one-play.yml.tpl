@@ -5,8 +5,6 @@
   hosts: localhost
   connection: local
   gather_facts: no
-  collections:
-    - vmware.alb
   vars:
     avi_credentials:
         controller: "{{ controller_ip[0] }}"
