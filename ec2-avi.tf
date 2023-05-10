@@ -189,16 +189,19 @@ resource "null_resource" "ansible_provisioner" {
   provisioner "remote-exec" {
     inline = var.configure_controller ? var.create_iam ? [
       "sleep 30",
+      "export ANSIBLE_COLLECTIONS_PATHS=/etc/ansible/collections:/home/admin/.ansible/collections:/usr/share/ansible/collections",
       "cd ansible",
       "ansible-playbook avi-controller-aws-all-in-one-play.yml -e password=${var.controller_password} 2> ansible-error.log | tee ansible-playbook.log",
       "echo Controller Configuration Completed"
       ] : [
       "sleep 30",
+      "export ANSIBLE_COLLECTIONS_PATHS=/etc/ansible/collections:/home/admin/.ansible/collections:/usr/share/ansible/collections",
       "cd ansible",
       "ansible-playbook avi-controller-aws-all-in-one-play.yml -e password=${var.controller_password} -e aws_access_key_id=${var.aws_access_key} -e aws_secret_access_key=${var.aws_secret_key} 2> ansible-error.log | tee ansible-playbook.log",
       "echo Controller Configuration Completed"
       ] : [
       "sleep 30",
+      "export ANSIBLE_COLLECTIONS_PATHS=/etc/ansible/collections:/home/admin/.ansible/collections:/usr/share/ansible/collections",
       "cd ansible",
       "ansible-playbook avi-controller-aws-all-in-one-play.yml -e password=${var.controller_password} --tags register_controller 2> ansible-error.log | tee ansible-playbook.log",
       "echo Controller Configuration Completed"
@@ -207,6 +210,7 @@ resource "null_resource" "ansible_provisioner" {
   provisioner "remote-exec" {
     inline = var.register_controller["enabled"] ? [
       "cd ansible",
+      "export ANSIBLE_COLLECTIONS_PATHS=/etc/ansible/collections:/home/admin/.ansible/collections:/usr/share/ansible/collections",
       "ansible-playbook avi-cloud-services-registration.yml -e password=${var.controller_password} 2>> ansible-error.log | tee -a ansible-playbook.log",
       "echo Controller Registration Completed"
     ] : ["echo Controller Registration Skipped"]
@@ -214,6 +218,7 @@ resource "null_resource" "ansible_provisioner" {
   provisioner "remote-exec" {
     inline = var.avi_upgrade["enabled"] ? [
       "cd ansible",
+      "export ANSIBLE_COLLECTIONS_PATHS=/etc/ansible/collections:/home/admin/.ansible/collections:/usr/share/ansible/collections",
       "ansible-playbook avi-upgrade.yml -e password=${var.controller_password} -e upgrade_type=${var.avi_upgrade["upgrade_type"]} 2>> ansible-error.log | tee -a ansible-playbook.log",
       "echo Avi upgrade completed"
     ] : ["echo Avi upgrade skipped"]
