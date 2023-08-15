@@ -93,3 +93,10 @@ resource "aws_iam_role_policy" "avi_kms" {
 
   policy = templatefile("${path.module}/files/iam/avicontroller-kms-policy.json.tpl", { awsPartition = data.aws_partition.current.partition })
 }
+resource "aws_iam_role_policy" "avi_s3_backup" {
+  count = var.create_iam ? 1 : 0
+  name  = "${var.name_prefix}-avicontroller-s3-backup-policy"
+  role  = aws_iam_role.avi[0].id
+
+  policy = templatefile("${path.module}/files/iam/avicontroller-s3-backup-policy.json.tpl", { awsPartition = data.aws_partition.current.partition, s3_bucket = aws_s3_bucket.s3_nsxalb_backups.id })
+}

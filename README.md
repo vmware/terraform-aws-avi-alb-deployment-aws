@@ -188,15 +188,15 @@ The terraform-aws-avi-alb-deployment-aws project team welcomes contributions fro
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.37.0 |
-| <a name="requirement_null"></a> [null](#requirement\_null) | 3.2.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.37.0 |
+| <a name="requirement_null"></a> [null](#requirement\_null) | >= 3.2.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.22.0 |
-| <a name="provider_null"></a> [null](#provider\_null) | 3.1.1 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.12.0 |
+| <a name="provider_null"></a> [null](#provider\_null) | 3.2.1 |
 
 ## Modules
 
@@ -219,19 +219,25 @@ No modules.
 | [aws_iam_role_policy.avi_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.avi_r53](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.avi_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy.avi_s3_backup](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.avi_sqs_sns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.avi_vmimport_kms_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.avi_vmimport_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_instance.avi_controller](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
 | [aws_internet_gateway.avi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
 | [aws_route.default_route](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
+| [aws_s3_bucket.s3_nsxalb_backups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+| [aws_s3_bucket_lifecycle_configuration.s3_nsxalb_backups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_lifecycle_configuration) | resource |
+| [aws_s3_bucket_ownership_controls.s3_nsxalb_backups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_ownership_controls) | resource |
+| [aws_s3_bucket_public_access_block.s3_nsxalb_backups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
+| [aws_s3_bucket_server_side_encryption_configuration.s3_nsxalb_backups](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
 | [aws_security_group.avi_controller_sg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.avi_data_sg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.avi_se_mgmt_sg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_subnet.avi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.avi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
-| [null_resource.ansible_provisioner](https://registry.terraform.io/providers/hashicorp/null/3.2.0/docs/resources/resource) | resource |
-| [null_resource.changepassword_provisioner](https://registry.terraform.io/providers/hashicorp/null/3.2.0/docs/resources/resource) | resource |
+| [null_resource.ansible_provisioner](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
+| [null_resource.changepassword_provisioner](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [aws_ami.avi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_availability_zones.azs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 | [aws_iam_role.vmimport](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_role) | data source |
@@ -265,6 +271,7 @@ No modules.
 | <a name="input_create_firewall_rules"></a> [create\_firewall\_rules](#input\_create\_firewall\_rules) | This variable controls the Security Group creation for the Avi deployment. When set to false the necessary security group rules must be in place before the deployment and set with the firewall\_custom\_security\_group\_ids variable | `bool` | `"true"` | no |
 | <a name="input_create_iam"></a> [create\_iam](#input\_create\_iam) | Create IAM policy, roles, and instance profile for Avi AWS Full Access Cloud. If set to false the aws\_access\_key and aws\_secret\_key variables will be used for the Cloud configuration and all policy must be created as found in https://avinetworks.com/docs/latest/iam-role-setup-for-installation-into-aws/ | `bool` | `"true"` | no |
 | <a name="input_create_networking"></a> [create\_networking](#input\_create\_networking) | This variable controls the VPC and subnet creation for the AVI Controller. When set to false the custom-vpc-name and custom-subnetwork-name must be set. | `bool` | `"true"` | no |
+| <a name="input_custom_ami"></a> [custom\_ami](#input\_custom\_ami) | The AMI ID of a custom controller AMI.  For internal use. | `string` | `null` | no |
 | <a name="input_custom_controller_name"></a> [custom\_controller\_name](#input\_custom\_controller\_name) | This field can be used to specify a custom controller name to replace the (prefix-avi-controller) standard name.  A numeric iterator will still be appended to the custom name (1,2,3) | `string` | `null` | no |
 | <a name="input_custom_controller_subnet_ids"></a> [custom\_controller\_subnet\_ids](#input\_custom\_controller\_subnet\_ids) | This field can be used to specify a list of existing VPC Subnets for the Controllers.  The create-networking variable must also be set to false for this network to be used. | `list(string)` | `null` | no |
 | <a name="input_custom_subnet_ids"></a> [custom\_subnet\_ids](#input\_custom\_subnet\_ids) | This field can be used to specify a list of existing VPC Subnets for the SEs. The create-networking variable must also be set to false for this network to be used. | `list(string)` | `null` | no |
@@ -287,6 +294,8 @@ No modules.
 | <a name="input_private_key_path"></a> [private\_key\_path](#input\_private\_key\_path) | The local private key path for the EC2 Key pair used for authenticating to the Avi Controller. Either private\_key\_path or private\_key\_contents must be supplied. | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | The Region that the AVI controller and SEs will be deployed to | `string` | n/a | yes |
 | <a name="input_register_controller"></a> [register\_controller](#input\_register\_controller) | If enabled is set to true the controller will be registered and licensed with Avi Cloud Services. The Long Organization ID (organization\_id) can be found from https://console.cloud.vmware.com/csp/gateway/portal/#/organization/info. The jwt\_token can be retrieved at https://portal.avipulse.vmware.com/portal/controller/auth/cspctrllogin. Optionally the controller name and description used during the registration can be set; otherwise, the name\_prefix and configure\_gslb.site\_name variables will be used. | <pre>object({<br>    enabled         = bool,<br>    jwt_token       = string,<br>    email           = string,<br>    organization_id = string,<br>    name            = optional(string),<br>    description     = optional(string)<br>  })</pre> | <pre>{<br>  "email": "",<br>  "enabled": "false",<br>  "jwt_token": "",<br>  "organization_id": ""<br>}</pre> | no |
+| <a name="input_s3_backup_bucket"></a> [s3\_backup\_bucket](#input\_s3\_backup\_bucket) | Name of the S3 bucket for Controller configuration backups | `string` | `null` | no |
+| <a name="input_s3_backup_retention"></a> [s3\_backup\_retention](#input\_s3\_backup\_retention) | Number of days to keep backups in S3 bucket | `number` | `4` | no |
 | <a name="input_se_ebs_encryption"></a> [se\_ebs\_encryption](#input\_se\_ebs\_encryption) | Enable encryption on SE AMI / EBS Volumes.  The AWS Managed EBS KMS key will be used if no key is provided with se\_ebs\_encryption\_key\_arn variable | `bool` | `"true"` | no |
 | <a name="input_se_ebs_encryption_key_arn"></a> [se\_ebs\_encryption\_key\_arn](#input\_se\_ebs\_encryption\_key\_arn) | AWS Resource Name of an existing KMS key for SE AMI/EBS (se\_ebs\_encryption must be set to true) | `string` | `null` | no |
 | <a name="input_se_ha_mode"></a> [se\_ha\_mode](#input\_se\_ha\_mode) | The HA mode of the default Service Engine Group. Possible values active/active, n+m, or active/standby | `string` | `"active/active"` | no |

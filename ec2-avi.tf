@@ -36,6 +36,7 @@ locals {
     portal_certificate        = var.portal_certificate
     securechannel_certificate = var.securechannel_certificate
     ca_certificates           = var.ca_certificates
+    s3_backup_bucket          = aws_s3_bucket.s3_nsxalb_backups.id
   }
   controller_names = aws_instance.avi_controller[*].tags.Name
   controller_ip    = aws_instance.avi_controller[*].private_ip
@@ -65,10 +66,9 @@ locals {
   check_vmimport_tags         = var.create_iam && length(data.aws_iam_roles.vmimport[0].names) == 1 && local.check_vmimport_tag_key ? data.aws_iam_role.vmimport[0].tags["terraform_module"] == "vmware/avi-alb-deployment-aws/aws" ? 1 : null : null
 }
 
-#tfsec:ignore:aws-ec2-enforce-http-token-imds
 resource "aws_instance" "avi_controller" {
   count = var.controller_ha ? 3 : 1
-  ami   = data.aws_ami.avi.id
+  ami   = var.custom_ami == null ? data.aws_ami.avi.id : var.custom_ami
   root_block_device {
     volume_size           = var.boot_disk_size
     delete_on_termination = true
@@ -84,10 +84,14 @@ resource "aws_instance" "avi_controller" {
   tags = {
     Name = (var.custom_controller_name != null) ? "${var.custom_controller_name}-${count.index + 1}" : "${var.name_prefix}-avi-controller-${count.index + 1}"
   }
+  metadata_options {
+    http_tokens = var.avi_version == "22.1.3" ? "required" : "optional"
+  }
   lifecycle {
     ignore_changes = [tags, associate_public_ip_address, root_block_device[0].tags]
   }
 }
+
 resource "aws_ec2_tag" "custom_controller_1" {
   for_each    = var.custom_tags
   resource_id = aws_instance.avi_controller[0].id
@@ -110,7 +114,7 @@ resource "null_resource" "changepassword_provisioner" {
   count = var.controller_ha ? 3 : 1
   # Changes to any instance of the cluster requires re-provisioning
   triggers = {
-    controller_instance_ids = join(",", aws_instance.avi_controller.*.id)
+    controller_instance_ids = join(",", aws_instance.avi_controller[*].id)
   }
   lifecycle {
     precondition {
@@ -137,7 +141,7 @@ resource "null_resource" "changepassword_provisioner" {
 resource "null_resource" "ansible_provisioner" {
   # Changes to any instance of the cluster requires re-provisioning
   triggers = {
-    controller_instance_ids = join(",", aws_instance.avi_controller.*.id)
+    controller_instance_ids = join(",", aws_instance.avi_controller[*].id)
   }
   depends_on = [null_resource.changepassword_provisioner]
   lifecycle {
