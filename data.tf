@@ -9,6 +9,7 @@ data "aws_subnet" "custom" {
   id       = each.value
 }
 data "aws_ami" "avi" {
+  count = var.custom_ami != null ? 1 : 0
   most_recent = true
   owners      = ["aws-marketplace"]
 
