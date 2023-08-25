@@ -68,7 +68,7 @@ locals {
 
 resource "aws_instance" "avi_controller" {
   count = var.controller_ha ? 3 : 1
-  ami   = var.custom_ami == null ? data.aws_ami.avi.id : var.custom_ami
+  ami   = var.custom_ami == null ? data.aws_ami.avi[count.index].id : var.custom_ami
   root_block_device {
     volume_size           = var.boot_disk_size
     delete_on_termination = true
