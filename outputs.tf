@@ -20,3 +20,18 @@ output "controller_public_addresses" {
   description = "Public IP Addresses for the AVI Controller(s)"
   value       = aws_instance.avi_controller[*].public_ip
 }
+
+output "controller_security_group_id" {
+  description = "Security Group associated with Avi Controller(s)"
+  value       = (var.create_firewall_rule ? aws_security_group.avi_controller_sg.id : null)
+}
+
+output "service_engine_avi_mgmt_security_group_id" {
+  description = "Security Group associated with Avi Service Engines for management traffic"
+  value       = (var.create_firewall_rule ? aws_security_group.avi_se_mgmt_sg.id : null)
+}
+
+output "service_engine_avi_data_security_group_id" {
+  description = "Security Group associated with Avi Service Engines for data traffic"
+  value       = (var.create_firewall_rule ? aws_security_group.avi_data_sg.id : null)
+}
