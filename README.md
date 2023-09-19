@@ -195,8 +195,8 @@ The terraform-aws-avi-alb-deployment-aws project team welcomes contributions fro
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.12.0 |
-| <a name="provider_null"></a> [null](#provider\_null) | 3.2.1 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.37.0 |
+| <a name="provider_null"></a> [null](#provider\_null) | >= 3.2.0 |
 
 ## Modules
 
@@ -310,5 +310,8 @@ No modules.
 |------|-------------|
 | <a name="output_controller_private_addresses"></a> [controller\_private\_addresses](#output\_controller\_private\_addresses) | The Private IP Addresses allocated for the Avi Controller(s) |
 | <a name="output_controller_public_addresses"></a> [controller\_public\_addresses](#output\_controller\_public\_addresses) | Public IP Addresses for the AVI Controller(s) |
+| <a name="output_controller_security_group_id"></a> [controller\_security\_group\_id](#output\_controller\_security\_group\_id) | Security Group associated with Avi Controller(s) |
 | <a name="output_controllers"></a> [controllers](#output\_controllers) | The AVI Controller(s) Information |
+| <a name="output_service_engine_avi_data_security_group_id"></a> [service\_engine\_avi\_data\_security\_group\_id](#output\_service\_engine\_avi\_data\_security\_group\_id) | Security Group associated with Avi Service Engines for data traffic |
+| <a name="output_service_engine_avi_mgmt_security_group_id"></a> [service\_engine\_avi\_mgmt\_security\_group\_id](#output\_service\_engine\_avi\_mgmt\_security\_group\_id) | Security Group associated with Avi Service Engines for management traffic |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
