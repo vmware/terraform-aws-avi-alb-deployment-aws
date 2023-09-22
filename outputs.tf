@@ -23,15 +23,15 @@ output "controller_public_addresses" {
 
 output "controller_security_group_id" {
   description = "Security Group associated with Avi Controller(s)"
-  value       = (var.create_firewall_rule ? aws_security_group.avi_controller_sg[0].id : null)
+  value       = (var.create_firewall_rules ? aws_security_group.avi_controller_sg[0].id : null)
 }
 
 output "service_engine_avi_mgmt_security_group_id" {
   description = "Security Group associated with Avi Service Engines for management traffic"
-  value       = (var.create_firewall_rule ? aws_security_group.avi_se_mgmt_sg[0].id : null)
+  value       = (var.create_firewall_rules ? aws_security_group.avi_se_mgmt_sg[0].id : null)
 }
 
 output "service_engine_avi_data_security_group_id" {
   description = "Security Group associated with Avi Service Engines for data traffic"
-  value       = (var.create_firewall_rule ? aws_security_group.avi_data_sg[0].id : null)
+  value       = (var.create_firewall_rules ? aws_security_group.avi_data_sg[0].id : null)
 }
