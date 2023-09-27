@@ -12,14 +12,14 @@ resource "aws_security_group" "avi_controller_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = var.firewall_controller_allow_source_range
+    cidr_blocks = var.firewall_controller_allow_source_ranges
   }
   ingress {
     description = "HTTPS from Internet"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = var.firewall_controller_allow_source_range
+    cidr_blocks = var.firewall_controller_allow_source_ranges
   }
   ingress {
     description = "Secure Channel from VPC"
@@ -33,7 +33,7 @@ resource "aws_security_group" "avi_controller_sg" {
     from_port   = 5054
     to_port     = 5054
     protocol    = "tcp"
-    cidr_blocks = var.firewall_controller_allow_source_range
+    cidr_blocks = var.firewall_controller_allow_source_ranges
   }
   ingress {
     description = "ICMP to Controller"
