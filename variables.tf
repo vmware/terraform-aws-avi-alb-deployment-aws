@@ -125,6 +125,11 @@ variable "create_firewall_rules" {
   type        = bool
   default     = "true"
 }
+variable "firewall_controller_allow_source_range" {
+  description = "The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default. DEPRECATED in favor of firewall_controller_allow_source_ranges"
+  type        = string
+  default     = null
+}
 variable "firewall_controller_allow_source_ranges" {
   description = "The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default"
   type        = list(string)

@@ -1,6 +1,10 @@
 # Copyright 2022 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+locals {
+  firewall_controller_allow_source_ranges = (var.firewall_controller_allow_source_range != null ? [var.firewall_controller_allow_source_range] : var.firewall_controller_allow_source_ranges)
+}
+
 resource "aws_security_group" "avi_controller_sg" {
   count       = var.create_firewall_rules ? 1 : 0
   name        = "${var.name_prefix}-avi-controller-sg"
@@ -12,14 +16,14 @@ resource "aws_security_group" "avi_controller_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = var.firewall_controller_allow_source_ranges
+    cidr_blocks = local.firewall_controller_allow_source_ranges
   }
   ingress {
     description = "HTTPS from Internet"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = var.firewall_controller_allow_source_ranges
+    cidr_blocks = local.firewall_controller_allow_source_ranges
   }
   ingress {
     description = "Secure Channel from VPC"
@@ -33,7 +37,7 @@ resource "aws_security_group" "avi_controller_sg" {
     from_port   = 5054
     to_port     = 5054
     protocol    = "tcp"
-    cidr_blocks = var.firewall_controller_allow_source_ranges
+    cidr_blocks = local.firewall_controller_allow_source_ranges
   }
   ingress {
     description = "ICMP to Controller"
