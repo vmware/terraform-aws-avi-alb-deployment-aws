@@ -126,9 +126,14 @@ variable "create_firewall_rules" {
   default     = "true"
 }
 variable "firewall_controller_allow_source_range" {
-  description = "The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default"
+  description = "The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default. DEPRECATED in favor of firewall_controller_allow_source_ranges"
   type        = string
-  default     = "0.0.0.0/0"
+  default     = null
+}
+variable "firewall_controller_allow_source_ranges" {
+  description = "The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
 }
 variable "firewall_controller_security_group_ids" {
   description = "List of security group IDs that will be assigned to the controller. This variable must be set if the create_firewall_rules variable is set to false"
