@@ -195,8 +195,8 @@ The terraform-aws-avi-alb-deployment-aws project team welcomes contributions fro
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.37.0 |
-| <a name="provider_null"></a> [null](#provider\_null) | >= 3.2.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.12.0 |
+| <a name="provider_null"></a> [null](#provider\_null) | 3.2.1 |
 
 ## Modules
 
@@ -280,8 +280,8 @@ No modules.
 | <a name="input_dns_search_domain"></a> [dns\_search\_domain](#input\_dns\_search\_domain) | The optional DNS search domain that will be used by the controller | `string` | `null` | no |
 | <a name="input_dns_servers"></a> [dns\_servers](#input\_dns\_servers) | The optional DNS servers that will be used for local DNS resolution by the controller. Example ["8.8.4.4", "8.8.8.8"] | `list(string)` | `null` | no |
 | <a name="input_email_config"></a> [email\_config](#input\_email\_config) | The Email settings that will be used for sending password reset information or for trigged alerts. The default setting will send emails directly from the Avi Controller | <pre>object({<br>    smtp_type        = string,<br>    from_email       = string,<br>    mail_server_name = string,<br>    mail_server_port = string,<br>    auth_username    = string,<br>    auth_password    = string<br>  })</pre> | <pre>{<br>  "auth_password": "",<br>  "auth_username": "",<br>  "from_email": "admin@avicontroller.net",<br>  "mail_server_name": "localhost",<br>  "mail_server_port": "25",<br>  "smtp_type": "SMTP_LOCAL_HOST"<br>}</pre> | no |
-| <a name="input_firewall_controller_allow_source_range"></a> [firewall\_controller\_allow\_source\_range](#input\_firewall\_controller\_allow\_source\_range) | The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default. DEPRECATED in favor of firewall_controller_allow_source_ranges | `string` | `null` | no |
-| <a name="input_firewall_controller_allow_source_ranges"></a> [firewall\_controller\_allow\_source\_ranges](#input\_firewall\_controller\_allow\_source\_ranges) | The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default | `list(string)` | `["0.0.0.0/0]"` | no |
+| <a name="input_firewall_controller_allow_source_range"></a> [firewall\_controller\_allow\_source\_range](#input\_firewall\_controller\_allow\_source\_range) | The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default. DEPRECATED in favor of firewall\_controller\_allow\_source\_ranges | `string` | `null` | no |
+| <a name="input_firewall_controller_allow_source_ranges"></a> [firewall\_controller\_allow\_source\_ranges](#input\_firewall\_controller\_allow\_source\_ranges) | The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
 | <a name="input_firewall_controller_security_group_ids"></a> [firewall\_controller\_security\_group\_ids](#input\_firewall\_controller\_security\_group\_ids) | List of security group IDs that will be assigned to the controller. This variable must be set if the create\_firewall\_rules variable is set to false | `list(string)` | `null` | no |
 | <a name="input_firewall_se_data_rules"></a> [firewall\_se\_data\_rules](#input\_firewall\_se\_data\_rules) | The data plane traffic allowed for Virtual Services hosted on Services Engines. The configure\_firewall\_rules variable must be set to true for these rules to be created | <pre>list(object({<br>    protocol       = string,<br>    port           = string,<br>    allow_ip_range = string,<br>    description    = string<br>  }))</pre> | <pre>[<br>  {<br>    "allow_ip_range": "0.0.0.0/0",<br>    "description": "https",<br>    "port": "443",<br>    "protocol": "tcp"<br>  },<br>  {<br>    "allow_ip_range": "10.0.0.0/8",<br>    "description": "DNS",<br>    "port": "53",<br>    "protocol": "udp"<br>  }<br>]</pre> | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The EC2 instance type for the Avi Controller | `string` | `"m5.2xlarge"` | no |
