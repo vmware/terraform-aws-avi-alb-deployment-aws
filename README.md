@@ -188,7 +188,7 @@ The terraform-aws-avi-alb-deployment-aws project team welcomes contributions fro
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.37.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.12.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | >= 3.2.0 |
 
 ## Providers
