@@ -131,7 +131,7 @@ variable "firewall_controller_allow_source_range" {
   default     = null
 }
 variable "firewall_controller_allow_source_ranges" {
-  description = "The IP range allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default"
+  description = "The IP ranges allowed to connect to the Avi Controller. Access from all IP ranges will be allowed by default"
   type        = list(string)
   default     = ["0.0.0.0/0"]
 }

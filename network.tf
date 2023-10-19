@@ -4,7 +4,7 @@
 resource "aws_eip" "avi" {
   count    = var.controller_public_address ? var.controller_ha ? 3 : 1 : 0
   instance = aws_instance.avi_controller[count.index].id
-  vpc      = true
+  domain   = "vpc"
   tags = {
     Name = (var.custom_controller_name != null) ? "${var.custom_controller_name}-${count.index + 1}" : "${var.name_prefix}-avi-controller-${count.index + 1}"
   }
