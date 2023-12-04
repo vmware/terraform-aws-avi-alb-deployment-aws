@@ -86,7 +86,7 @@ resource "aws_instance" "avi_controller" {
   }
   metadata_options {
     # Only supported with AVI versions 22.1.3 and newer
-    http_tokens = can(regex("^(?:2[2-9]|[3-9]\\d|\\d{3,})\\.\\d+\\.\\d+$", var.avi_version)) ? "required" : "optional"
+    http_tokens = can(regex("^(22.[1-9].[3-9]|([3-9]\\d|\\d{3,})\\.\\d+\\.\\d+)$", var.avi_version)) ? "required" : "optional"
   }
   lifecycle {
     ignore_changes = [tags, associate_public_ip_address, root_block_device[0].tags]
