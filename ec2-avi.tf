@@ -62,8 +62,8 @@ locals {
     },
   )
   check_for_vmimport_iam_role = var.create_iam ? length(data.aws_iam_roles.vmimport[0].names) : null
-  check_vmimport_tag_key      = can(data.aws_iam_role.vmimport[0].tags["terraform_module"])
-  check_vmimport_tags         = var.create_iam && length(data.aws_iam_roles.vmimport[0].names) == 1 && local.check_vmimport_tag_key ? data.aws_iam_role.vmimport[0].tags["terraform_module"] == "vmware/avi-alb-deployment-aws/aws" ? 1 : null : null
+  check_vmimport_tag_key      = var.create_iam ? can(data.aws_iam_role.vmimport[0].tags["terraform_module"]) : false 
+  check_vmimport_tags         = var.create_iam ? (length(data.aws_iam_roles.vmimport[0].names) == 1 && local.check_vmimport_tag_key ? (data.aws_iam_role.vmimport[0].tags["terraform_module"] == "vmware/avi-alb-deployment-aws/aws" ? 1 : null) : null) : null 
 }
 
 resource "aws_instance" "avi_controller" {
